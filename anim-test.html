@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Revisión de animaciones</title>
+<link rel="stylesheet" href="css/styles.css">
+<style>
+  :root { color-scheme: light; }
+  body { background: #fff; }
+  .g { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; padding: 8px; }
+  .c { border: 1px solid #ddd; border-radius: 8px; padding: 4px; font: 11px sans-serif; }
+  .c div { display: flex; } .c svg { width: 50%; height: auto; }
+</style></head>
+<body><div class="g" id="g"></div>
+<script src="js/data.js"></script><script src="js/data-extra.js"></script><script src="js/config.js"></script><script src="js/graphics.js"></script><script src="js/anim.js"></script><script src="js/anim-extra.js"></script>
+<script>
+  const only = new URLSearchParams(location.search).get('m');
+  document.getElementById('g').innerHTML = MACHINES.filter(m => !only || m.id === only).flatMap(m => m.exercises.map(e =>
+    `<div class="c"><b>${m.short} · ${e.name}</b><div>${Anim.staticSVG(m.id, e, 0)}${Anim.staticSVG(m.id, e, 1)}</div></div>`)).join('');
+</script></body></html>
