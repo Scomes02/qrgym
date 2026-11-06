@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QrGym · Carteles QR</title>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,700;1,900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+  <style>
+    :root { color-scheme: light; }
+    body { background: #f4f5f7; color: #111318; }
+    .config { background: #fff; border: 1px solid #e3e6eb; border-radius: 14px; padding: 14px; margin: 16px 0; }
+    .config label { font-weight: 800; font-size: 14px; display: block; margin-bottom: 6px; }
+    .config input { width: 100%; font: inherit; padding: 10px 12px; border-radius: 10px; border: 1px solid #c9ced6; }
+    .config p { color: #5f6673; font-size: 13px; margin: 8px 0 0; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    .row button { font: inherit; font-weight: 800; border: 0; border-radius: 999px; padding: 10px 18px; background: #111318; color: #fff; cursor: pointer; }
+    .posters { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); padding-bottom: 32px; }
+    .poster { background: #fff; border-radius: 18px; border: 2px solid #111318; padding: 20px; text-align: center; break-inside: avoid; page-break-inside: avoid; }
+    .poster .brand { justify-content: center; margin-bottom: 4px; }
+    .poster h2 { font-weight: 900; font-style: italic; text-transform: uppercase; font-size: 26px; margin: 4px 0 2px; line-height: 1.05; }
+    .poster .sub { color: #5f6673; margin: 0 0 12px; font-size: 14px; }
+    .poster .qr svg { width: 100%; max-width: 220px; height: auto; }
+    .poster .cta { font-weight: 900; font-style: italic; text-transform: uppercase; background: #e0352b; color: #fff; border-radius: 999px; padding: 8px 12px; margin-top: 10px; }
+    .poster .url { font-size: 11px; color: #5f6673; word-break: break-all; margin-top: 8px; }
+    .poster .art { width: 90px; margin: 6px auto 0; }
+    @media print {
+      .topbar, .config, .no-print { display: none !important; }
+      body { background: #fff; }
+      .posters { grid-template-columns: 1fr 1fr; }
+      .poster { border-width: 3px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar"><a href="index.html" class="brand"><span class="brand-mark">QR</span>GYM</a><span class="no-print" style="font-weight:700">Carteles QR para imprimir</span></header>
+  <main class="wrap">
+    <section class="config">
+      <label for="base">Dirección de la página publicada</label>
+      <input id="base" type="url" placeholder="https://mi-gimnasio.com/qrgym/">
+      <p>Cuando subas la página a internet, pegá acá su dirección y los QR se actualizan solos. Después tocá "Imprimir".</p>
+      <div class="row"><button onclick="window.print()">🖨 Imprimir</button></div>
+    </section>
+    <div class="posters" id="posters"></div>
+  </main>
+
+  <script src="js/data.js"></script>
+  <script src="js/data-extra.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/graphics.js"></script>
+  <script src="js/anim.js"></script>
+  <script src="js/anim-extra.js"></script>
+  <script>
+    const input = document.getElementById('base');
+    const def = location.href.replace(/qr\.html.*$/, '');
+    let saved = null;
+    try { saved = localStorage.getItem('qrgym-base'); } catch (e) {}
+    input.value = saved || def;
+
+    function draw() {
+      let base = input.value.trim() || def;
+      if (!base.endsWith('/') && !base.endsWith('.html')) base += '/';
+      try { localStorage.setItem('qrgym-base', input.value.trim()); } catch (e) {}
+      document.getElementById('posters').innerHTML = MACHINES.map(m => {
+        const url = `${base}${base.endsWith('.html') ? '' : 'index.html'}?m=${m.id}`;
+        let svg = '<p>Cargando QR…</p>';
+        if (window.qrcode) {
+          const qr = qrcode(0, 'M'); qr.addData(url); qr.make();
+          svg = qr.createSvgTag({ cellSize: 6, margin: 2, scalable: true });
+        }
+        return `<article class="poster">
+          <div class="brand"><span class="brand-mark">QR</span>GYM</div>
+          <div class="art">${MACHINE_ICONS[m.icon] || Anim.staticSVG(m.id, m.exercises[0], 0.55, 'm-icon anim-svg')}</div>
+          <h2>${m.short}</h2>
+          <p class="sub">${m.exercises.length} ejercicios · músculos · videos</p>
+          <div class="qr">${svg}</div>
+          <div class="cta">Escaneame y aprendé a usarla</div>
+          <div class="url">${url}</div>
+        </article>`;
+      }).join('');
+    }
+    input.addEventListener('input', draw);
+    draw();
+  </script>
+</body>
+</html>
