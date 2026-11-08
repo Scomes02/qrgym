@@ -354,3 +354,4 @@ video, .video-frame { width: 100%; border-radius: 14px; background: #000; displa
 .anim-pro .eq-floor { stroke: #c3c8cf; }
 .anim-pro .eq-plate { fill: #9aa1ac; stroke: #3a3f49; }
 .anim-pro .eq-hub { fill: #eef0f3; }
+.pb-hi-line { fill: none; stroke: #fff; stroke-width: 2.5; opacity: .45; stroke-linecap: round; }

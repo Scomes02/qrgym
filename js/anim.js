@@ -222,14 +222,14 @@ const Anim = (() => {
      se dibujan los vientres musculares con fibras. Los que trabajan
      se pintan de rojo y se hinchan un poco al contraer.
      ============================================================ */
-  const PRO = { all: false, list: new Set(['prensa/estandar']) };
+  const PRO = { all: true, list: new Set() }; // all: true = figura con cuerpo en todas las animaciones
   const PRO_DEFS = '<defs><filter id="proShadow" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="1.2" stdDeviation="1.1" flood-color="#000" flood-opacity=".28"/></filter></defs>';
   const isPro = (machineId, exId) => PRO.all || PRO.list.has(`${machineId}/${exId}`) || PRO.list.has(machineId);
 
   /* Anchos [inicio, fin, bulto adelante, bulto atrás, punto del bulto] */
   const PW = {
     t: [19, 12, 2.6, 1.8, .4], s: [11.5, 7, .6, 3.2, .3], u: [10.5, 8, 1.6, 1.6, .4], f: [9, 6, 1.2, .6, .3],
-    torso: [25, 27, 2.4, 2.2, .62], torsoSlim: [19, 20.5, 1.2, 1, .62], foot: [8, 5.5, 0, 0, .5], neck: [9.5, 9, 0, 0, .5]
+    torso: [25, 27, 2.4, 2.2, .62], torsoSlim: [15.5, 16.5, 1, .8, .62], foot: [8, 5.5, 0, 0, .5], neck: [9.5, 9, 0, 0, .5]
   };
   /* Vientres musculares por segmento: { id, de, a, desplazamiento (−1 atrás … 1 adelante), grosor } */
   const PROM = {
@@ -332,8 +332,110 @@ const Anim = (() => {
     return s;
   }
 
+  /* ---------- Vista de FRENTE ---------- */
+  /* Músculos de brazos y piernas vistos de frente: off > 0 = hacia adentro, < 0 = hacia afuera */
+  const PROM_F = {
+    t: [
+      { id: 'abductores', from: -.12, to: .26, off: -.62, th: .4 },
+      { id: 'cuadriceps', from: .12, to: .92, off: -.12, th: .5 },
+      { id: 'cuadriceps', from: .5, to: .96, off: .3, th: .32 },
+      { id: 'aductores', from: .04, to: .56, off: .55, th: .36 },
+      { id: 'gluteos', from: -.14, to: .14, off: -.35, th: .3 }
+    ],
+    s: [
+      { id: 'gemelos', from: .06, to: .5, off: .5, th: .34 },
+      { id: 'gemelos', from: .08, to: .45, off: -.5, th: .3 },
+      { id: null, from: .12, to: .8, off: -.1, th: .24 }
+    ],
+    u: [
+      { id: 'deltoide_lat', from: -.16, to: .36, off: -.25, th: .55 },
+      { id: 'deltoide_ant', from: -.12, to: .34, off: .3, th: .45 },
+      { id: 'deltoide_post', from: -.14, to: .2, off: -.55, th: .3 },
+      { id: 'biceps', from: .3, to: .9, off: .1, th: .5 },
+      { id: 'triceps', from: .28, to: .88, off: -.6, th: .3 }
+    ],
+    f: [{ id: 'antebrazo', from: .06, to: .7, off: 0, th: .7 }]
+  };
+
+  function musclesOnF(p1, p2, key, i, P, Sx, pp, animated) {
+    let s = '';
+    const sg = i === 0 ? 1 : -1; // espeja el lado "adentro"
+    (PROM_F[key] || []).forEach(m => {
+      const prim = m.id && P.includes(m.id), sec = m.id && !prim && Sx.includes(m.id);
+      const cls = prim ? 'pm-p' : sec ? 'pm-s' : 'pm-n';
+      const swell = prim && animated ? 1 + .2 * pp : sec && animated ? 1 + .08 * pp : 1;
+      const op = prim ? (animated ? .7 + .3 * pp : 1) : sec ? (animated ? .6 + .3 * pp : .9) : 1;
+      s += belly(p1, p2, key, false, Object.assign({}, m, { off: m.off * sg }), cls, swell, op);
+    });
+    return s;
+  }
+
+  function proFront(J, P, Sx, pp, animated) {
+    const all = [...P, ...Sx];
+    const slim = !all.some(id => TORSO_IDS.includes(id));
+    const k = slim ? .86 : 1;
+    const cx = J.H[0], sy = J.arms[0].S[1] - 4, hy = J.H[1] + 4, TH = hy - sy;
+    const T = (xf, yf) => [cx + xf * k, sy + yf * TH];
+    const muscleCls = (id) => P.includes(id) ? 'pm-p' : Sx.includes(id) ? 'pm-s' : 'pm-n';
+    const opOf = (id) => P.includes(id) ? (animated ? .7 + .3 * pp : 1) : Sx.includes(id) ? (animated ? .6 + .3 * pp : .9) : 1;
+    const sw = (id) => P.includes(id) && animated ? 1 + .15 * pp : 1;
+    const shape = (id, d) => {
+      const op = opOf(id);
+      return `<path d="${d}" class="${muscleCls(id)}"${op < 1 ? ` style="opacity:${op.toFixed(2)}"` : ''}/>`;
+    };
+    const P2 = q => pt(q);
+    // Tronco
+    const torso = `M${P2(T(-19, .04))} Q${P2(T(0, -.06))} ${P2(T(19, .04))} Q${P2(T(19, .38))} ${P2(T(12.5, .66))} ` +
+      `Q${P2(T(14.5, .9))} ${P2(T(12, 1.02))} Q${P2(T(0, 1.1))} ${P2(T(-12, 1.02))} Q${P2(T(-14.5, .9))} ${P2(T(-12.5, .66))} ` +
+      `Q${P2(T(-19, .38))} ${P2(T(-19, .04))}Z`;
+    let tm = '';
+    // Dorsales (asoman a los costados) y trapecio
+    [-1, 1].forEach(sd => {
+      tm += shape('dorsal', `M${P2(T(16.5 * sd, .2))} Q${P2(T(19.5 * sd, .42))} ${P2(T(13 * sd, .64))} Q${P2(T(14 * sd, .42))} ${P2(T(16.5 * sd, .2))}Z`);
+      tm += shape('trapecio', `M${P2(T(5 * sd, -.08))} Q${P2(T(12 * sd, -.06))} ${P2(T(17 * sd, .05))} Q${P2(T(10 * sd, .06))} ${P2(T(5 * sd, -.08))}Z`);
+      tm += shape('romboides', `M${P2(T(3 * sd, -.02))} Q${P2(T(6 * sd, .02))} ${P2(T(4 * sd, .06))}Z`);
+    });
+    // Pectorales
+    [-1, 1].forEach(sd => {
+      const s1 = sw('pecho_sup'), s2 = sw('pecho_inf');
+      tm += shape('pecho_sup', `M${P2(T(1 * sd, .12))} Q${P2(T(9 * sd, .02 - .03 * s1))} ${P2(T(17 * sd, .12))} Q${P2(T(9 * sd, .2 * s1))} ${P2(T(1 * sd, .12))}Z`);
+      tm += shape('pecho_inf', `M${P2(T(1 * sd, .16))} Q${P2(T(10 * sd, .14))} ${P2(T(16.5 * sd, .15))} Q${P2(T(12 * sd, .36 * s2))} ${P2(T(1 * sd, .32))}Z`);
+    });
+    // Abdomen (3 pares) y oblicuos
+    [.4, .55, .7].forEach((y, r) => [-1, 1].forEach(sd => {
+      tm += shape('abdomen', `M${P2(T(.8 * sd, y))} L${P2(T(5.6 * sd, y + .01))} Q${P2(T(6.4 * sd, y + .07))} ${P2(T(5.4 * sd, y + .13))} L${P2(T(.8 * sd, y + .13))}Z`);
+    }));
+    tm += shape('abdomen', `M${P2(T(-4.5, .85))} L${P2(T(4.5, .85))} L${P2(T(2, 1.04))} L${P2(T(-2, 1.04))}Z`);
+    [-1, 1].forEach(sd => {
+      tm += shape('oblicuos', `M${P2(T(7.5 * sd, .42))} Q${P2(T(13.5 * sd, .55))} ${P2(T(11 * sd, .9))} Q${P2(T(8 * sd, .66))} ${P2(T(7.5 * sd, .42))}Z`);
+    });
+    // Piernas y brazos
+    const leg = i => {
+      const l = J.legs[i];
+      return volume(l.H, l.K, 't', false, '') + musclesOnF(l.H, l.K, 't', i, P, Sx, pp, animated) +
+        volume(l.K, l.A, 's', false, '') + musclesOnF(l.K, l.A, 's', i, P, Sx, pp, animated) +
+        `<ellipse cx="${f1(l.A[0] + (i === 0 ? -2 : 2))}" cy="${f1(l.A[1] + 3)}" rx="6" ry="4" class="pb-skin pb-shoe"/>` +
+        circ(l.K, 5, 'pb-joint');
+    };
+    const arm = i => {
+      const a = J.arms[i];
+      return volume(a.S, a.E, 'u', false, '') + musclesOnF(a.S, a.E, 'u', i, P, Sx, pp, animated) +
+        volume(a.E, a.Hd, 'f', false, '') + musclesOnF(a.E, a.Hd, 'f', i, P, Sx, pp, animated) +
+        `<ellipse cx="${f1(a.Hd[0])}" cy="${f1(a.Hd[1])}" rx="4.6" ry="5.4" class="pb-skin"/>`;
+    };
+    const neckB = [cx, sy + 2], hc = [cx, J.Head[1] + 2];
+    const head = `<rect x="${f1(cx - 4.5)}" y="${f1(hc[1] + 6)}" width="9" height="${f1(Math.max(4, neckB[1] - hc[1] - 4))}" rx="3" class="pb-skin"/>` +
+      `<ellipse cx="${f1(cx - 10)}" cy="${f1(hc[1] + 1)}" rx="2" ry="3" class="pb-ear"/><ellipse cx="${f1(cx + 10)}" cy="${f1(hc[1] + 1)}" rx="2" ry="3" class="pb-ear"/>` +
+      `<ellipse cx="${f1(cx)}" cy="${f1(hc[1])}" rx="9.6" ry="11.4" class="pb-skin"/>` +
+      `<circle cx="${f1(cx - 3.6)}" cy="${f1(hc[1] - 1)}" r="1.1" class="pb-eye"/><circle cx="${f1(cx + 3.6)}" cy="${f1(hc[1] - 1)}" r="1.1" class="pb-eye"/>`;
+    return leg(0) + leg(1) +
+      `<path d="${torso}" class="pb-skin"/>` + tm +
+      `<path d="M${P2(T(-6, .12))} Q${P2(T(-9, .55))} ${P2(T(-6, .95))}" class="pb-hi-line"/>` +
+      head + arm(0) + arm(1);
+  }
+
   function proFigure(J, P, Sx, pp, animated) {
-    if (J.front) return figureSVG(J) + `<g>${musclesSVG(J, Sx, 'mu-s')}</g><g>${musclesSVG(J, P, 'mu-p')}</g>`;
+    if (J.front) return proFront(J, P, Sx, pp, animated);
     const leg = (i, far) => {
       const l = J.legs[i], tone = far ? 'pb-far' : '';
       return `<g class="${far ? 'pb-farg' : ''}">` +
@@ -350,7 +452,7 @@ const Anim = (() => {
         `<ellipse cx="${f1(a.Hd[0])}" cy="${f1(a.Hd[1])}" rx="4.6" ry="5.4" class="pb-skin ${tone}"/>` + '</g>';
     };
     const v = dir(J.torso), nf = [-v[1], v[0]];
-    const torsoTop = add(J.Sh, v, 4);
+    const torsoTop = add(J.Sh, v, -5); // el torso termina en los hombros, donde empieza el cuello
     const neckTop = add(J.Sh, v, 13);
     const hc = add(J.Head, v, 1);
     const ang = Math.atan2(v[1], v[0]) * 180 / Math.PI;
@@ -365,7 +467,7 @@ const Anim = (() => {
     const pelvis = add(add(J.H, v, 2), nf, slim ? -1 : -2);
     return leg(1, true) + arm(1, true) +
       volume(J.H, torsoTop, tk, true, '') +
-      `<ellipse cx="${f1(pelvis[0])}" cy="${f1(pelvis[1])}" rx="${slim ? 11 : 13}" ry="${slim ? 9.5 : 11.5}" class="pb-skin pb-hip"/>` +
+      `<ellipse cx="${f1(pelvis[0])}" cy="${f1(pelvis[1])}" rx="${slim ? 9.5 : 13}" ry="${slim ? 8.5 : 11.5}" class="pb-skin pb-hip"/>` +
       musclesOn(J.H, torsoTop, tk, true, P, Sx, pp, animated, false) +
       volume(J.Sh, neckTop, 'neck', true, '') + head +
       arm(0, false) + leg(0, false);
