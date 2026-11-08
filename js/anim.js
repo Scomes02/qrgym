@@ -229,7 +229,7 @@ const Anim = (() => {
   /* Anchos [inicio, fin, bulto adelante, bulto atrás, punto del bulto] */
   const PW = {
     t: [19, 12, 2.6, 1.8, .4], s: [11.5, 7, .6, 3.2, .3], u: [10.5, 8, 1.6, 1.6, .4], f: [9, 6, 1.2, .6, .3],
-    torso: [25, 27, 2.4, 2.2, .62], foot: [8, 5.5, 0, 0, .5], neck: [9.5, 9, 0, 0, .5]
+    torso: [25, 27, 2.4, 2.2, .62], torsoSlim: [19, 20.5, 1.2, 1, .62], foot: [8, 5.5, 0, 0, .5], neck: [9.5, 9, 0, 0, .5]
   };
   /* Vientres musculares por segmento: { id, de, a, desplazamiento (−1 atrás … 1 adelante), grosor } */
   const PROM = {
@@ -264,6 +264,8 @@ const Anim = (() => {
       { id: 'pecho_sup', from: .7, to: .96, off: .46, th: .34 }
     ]
   };
+  PROM.torsoSlim = PROM.torso;
+  const TORSO_IDS = PROM.torso.map(m => m.id);
   const LIGHT = [-0.55, -0.83]; // luz desde arriba a la izquierda
 
   const pt = q => `${f1(q[0])} ${f1(q[1])}`;
@@ -354,16 +356,17 @@ const Anim = (() => {
     const ang = Math.atan2(v[1], v[0]) * 180 / Math.PI;
     const head =
       `<ellipse cx="${f1(hc[0])}" cy="${f1(hc[1])}" rx="11.5" ry="9.8" transform="rotate(${f1(ang)} ${f1(hc[0])} ${f1(hc[1])})" class="pb-skin"/>` +
-      `<path d="M${pt(add(add(hc, v, -4), nf, -11))} Q${pt(add(add(hc, v, 13), nf, -13))} ${pt(add(add(hc, v, 9), nf, 6))} ` +
-      `Q${pt(add(add(hc, v, 5), nf, -2))} ${pt(add(add(hc, v, -4), nf, -11))}Z" class="pb-hair"/>` +
       `<path d="M${pt(add(add(hc, v, -1), nf, 9.6))} L${pt(add(add(hc, v, -3), nf, 12.4))} L${pt(add(add(hc, v, -5), nf, 9.6))}" class="pb-skin pb-nose"/>` +
       `<ellipse cx="${f1(add(hc, nf, -1.5)[0])}" cy="${f1(add(hc, nf, -1.5)[1])}" rx="2.2" ry="2.8" transform="rotate(${f1(ang)} ${f1(add(hc, nf, -1.5)[0])} ${f1(add(hc, nf, -1.5)[1])})" class="pb-ear"/>` +
       `<circle cx="${f1(add(add(hc, v, 1.5), nf, 6.5)[0])}" cy="${f1(add(add(hc, v, 1.5), nf, 6.5)[1])}" r="1.1" class="pb-eye"/>`;
-    const pelvis = add(add(J.H, v, 2), nf, -2);
+    /* Torso más delgado cuando el ejercicio no trabaja músculos del tronco (ej.: prensa) */
+    const tk = [...P, ...Sx].some(id => TORSO_IDS.includes(id)) ? 'torso' : 'torsoSlim';
+    const slim = tk === 'torsoSlim';
+    const pelvis = add(add(J.H, v, 2), nf, slim ? -1 : -2);
     return leg(1, true) + arm(1, true) +
-      volume(J.H, torsoTop, 'torso', true, '') +
-      `<ellipse cx="${f1(pelvis[0])}" cy="${f1(pelvis[1])}" rx="13" ry="11.5" class="pb-skin pb-hip"/>` +
-      musclesOn(J.H, torsoTop, 'torso', true, P, Sx, pp, animated, false) +
+      volume(J.H, torsoTop, tk, true, '') +
+      `<ellipse cx="${f1(pelvis[0])}" cy="${f1(pelvis[1])}" rx="${slim ? 11 : 13}" ry="${slim ? 9.5 : 11.5}" class="pb-skin pb-hip"/>` +
+      musclesOn(J.H, torsoTop, tk, true, P, Sx, pp, animated, false) +
       volume(J.Sh, neckTop, 'neck', true, '') + head +
       arm(0, false) + leg(0, false);
   }
