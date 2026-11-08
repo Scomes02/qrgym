@@ -11,6 +11,159 @@
 const $app = document.getElementById('app');
 const state = { cat: {}, muscle: {}, group: 'Todas', q: '' };
 
+/* ============================================================
+   Demostración con imagen/GIF/video REAL + brillo muscular
+   ------------------------------------------------------------
+   Para cada ejercicio que tenga una entrada acá, la tarjeta
+   "Mirá cómo se hace" muestra la imagen real de fondo y, encima,
+   un SVG semitransparente que hace brillar en rojo los músculos.
+
+   - src:    imagen, GIF o video (.mp4/.webm). Con video además
+             funcionan Pausa y Lento.
+   - period: segundos que dura UNA repetición en el GIF/video.
+             El brillo late a ese ritmo (más fuerte al empujar).
+   - zones:  zonas a iluminar. Las coordenadas van de 0 a 100
+             (porcentaje del ancho y alto de la imagen), así que
+             sirven para cualquier tamaño de archivo.
+               muscle: id del músculo (ver MUSCLES en data.js)
+               level:  'p' = principal (rojo fuerte), 's' = secundario
+               shape:  forma SVG en coordenadas 0–100
+               offset: corrimiento del pico dentro de la repetición (0–1)
+   Para acomodar las zonas sobre tu GIF, abrí la página con
+   ?zonas al final de la dirección: se ven los contornos y nombres.
+   ============================================================ */
+const REAL_MEDIA = {
+  'prensa/estandar': {
+    off: true, // desactivado: ahora usa la animación propia con cuerpo (figura PRO)
+    src: 'assets/leg-press.gif',
+    alt: 'Persona haciendo prensa de piernas 45° con los pies al medio de la plataforma',
+    period: 3,
+    /* Este GIF ya trae los músculos marcados en rojo: no le superponemos brillo.
+       Para un GIF sin marcar, agregá zonas acá, por ejemplo:
+       { muscle: 'cuadriceps', level: 'p', offset: 0, shape: '<ellipse cx="46" cy="53" rx="13" ry="5"/>' } */
+    zones: []
+  }
+};
+
+/* Estilos propios de la demostración real (se inyectan una sola vez) */
+(function injectRealMediaStyles() {
+  if (document.getElementById('real-media-css')) return;
+  const css = `
+    .real-media { position: relative; background: #fff; line-height: 0; max-width: 420px; margin: 0 auto; }
+    .real-box { background: #fff; }
+    .real-media img, .real-media video { width: 100%; height: auto; display: block; }
+    .rm-overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; transition: opacity .25s; }
+    .rm-overlay.off { opacity: 0; }
+    .rm-zone { fill: var(--prim); stroke: none; }
+    .rm-zone.lv-s { fill: #ff7a5c; }
+    .rm-core { fill: none; stroke: #ffd9d4; stroke-width: .35; opacity: .55; }
+    .rm-debug .rm-core { stroke: #00e5ff; stroke-width: .5; stroke-dasharray: 1.5 1; opacity: 1; }
+    .rm-label { display: none; font: 800 3.2px 'Archivo', sans-serif; fill: #00e5ff; }
+    .rm-debug .rm-label { display: block; }
+    .rm-missing { line-height: 1.4; padding: 10px 12px; font-size: 13px; font-weight: 700; color: var(--muted); background: var(--bg); border-bottom: 1px solid var(--line); }
+    .rm-missing code { font-size: 12px; }
+  `;
+  const tag = document.createElement('style');
+  tag.id = 'real-media-css';
+  tag.textContent = css;
+  document.head.appendChild(tag);
+})();
+
+let mediaStop = null; // corta el loop del brillo al cambiar de página
+
+/* Arma el HTML de la demostración real */
+function realMediaHTML(cfg) {
+  const isVideo = /\.(mp4|webm|mov)(\?|$)/i.test(cfg.src);
+  const media = isVideo
+    ? `<video src="${esc(cfg.src)}" autoplay loop muted playsinline preload="auto" aria-label="${esc(cfg.alt || '')}"></video>`
+    : `<img src="${esc(cfg.src)}" alt="${esc(cfg.alt || '')}" decoding="async">`;
+  const debug = new URLSearchParams(location.search).has('zonas');
+  const zones = cfg.zones.map((z, i) => `
+    <g class="rm-g" data-i="${i}">
+      <g class="rm-zone lv-${z.level}" filter="url(#rmGlow)">${z.shape}</g>
+      <g class="rm-core">${z.shape}</g>
+    </g>`).join('');
+  const labels = cfg.zones.map(z => {
+    const m = z.shape.match(/cx="([\d.]+)"\s+cy="([\d.]+)"/);
+    return m ? `<text class="rm-label" x="${m[1]}" y="${m[2]}" text-anchor="middle">${esc(MUSCLES[z.muscle] || z.muscle)}</text>` : '';
+  }).join('');
+  return `
+    <div class="real-media" data-video="${isVideo ? 1 : 0}">
+      ${media}
+      <svg class="rm-overlay ${debug ? 'rm-debug' : ''}" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <filter id="rmGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="1.6" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        ${zones}
+        ${labels}
+      </svg>
+    </div>`;
+}
+
+/* Hace latir el brillo. Con video se sincroniza con el tiempo real del video;
+   con GIF/imagen usa el reloj de la página. Devuelve un control tipo player. */
+function mountRealMedia(box, cfg) {
+  box.innerHTML = realMediaHTML(cfg);
+  const wrap = box.querySelector('.real-media');
+  const overlay = wrap.querySelector('.rm-overlay');
+  const video = wrap.querySelector('video');
+  const groups = [...wrap.querySelectorAll('.rm-g')];
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let paused = false, speed = 1, clock = 0, last = performance.now(), raf = 0;
+
+  const fail = () => {
+    stop();
+    document.querySelectorAll('[data-zones]').forEach(b => b.hidden = true);
+    box.innerHTML =`<p class="rm-missing">No se encontró la imagen <code>${esc(cfg.src)}</code>. Mostrando la animación dibujada.</p><div class="anim" id="anim-fallback"></div>`;
+    const p = Anim.mount(box.querySelector('#anim-fallback'), cfg._machine, cfg._exercise);
+    if (p) fallbackPlayer = p;
+  };
+  let fallbackPlayer = null;
+  (video || wrap.querySelector('img')).addEventListener('error', fail);
+
+  const frame = (now) => {
+    const dt = (now - last) / 1000; last = now;
+    if (!paused) clock += dt * speed;
+    const t = video && !isNaN(video.currentTime) ? video.currentTime : clock;
+    const period = cfg.period || 3;
+    groups.forEach((g, i) => {
+      const z = cfg.zones[i];
+      const base = z.level === 'p' ? 0.38 : 0.22;
+      const amp = z.level === 'p' ? 0.5 : 0.32;
+      let k = 1;
+      if (!reduce) {
+        const ph = ((t / period + (z.offset || 0)) % 1 + 1) % 1;
+        k = 0.5 - 0.5 * Math.cos(ph * Math.PI * 2); // 0 → 1 → 0 en cada repetición
+      }
+      g.style.opacity = (base + amp * k).toFixed(3);
+    });
+    raf = requestAnimationFrame(frame);
+  };
+  raf = requestAnimationFrame(frame);
+
+  function stop() { cancelAnimationFrame(raf); raf = 0; }
+  mediaStop = () => { stop(); if (fallbackPlayer) Anim.stopAll(); };
+
+  return {
+    isVideo: !!video,
+    toggle() {
+      if (fallbackPlayer) return fallbackPlayer.toggle();
+      paused = !paused;
+      if (video) paused ? video.pause() : video.play();
+      return paused;
+    },
+    setSpeed(s) {
+      if (fallbackPlayer) return fallbackPlayer.setSpeed(s);
+      speed = s;
+      if (video) video.playbackRate = s;
+    },
+    toggleZones() { overlay.classList.toggle('off'); return !overlay.classList.contains('off'); }
+  };
+}
+
 /* Ícono de máquina: dibujo propio o, si no tiene, un cuadro de su primera animación */
 function machineIcon(m) {
   if (m.icon && MACHINE_ICONS[m.icon]) return MACHINE_ICONS[m.icon];
@@ -141,6 +294,8 @@ function renderExercise(m, e) {
   const idx = m.exercises.indexOf(e);
   const prev = m.exercises[idx - 1], next = m.exercises[idx + 1];
   const P = expandMuscles(e.primary), S = expandMuscles(e.secondary);
+  const realCfg = REAL_MEDIA[`${m.id}/${e.id}`];
+  const real = realCfg && !realCfg.off ? realCfg : null;
 
   let posExtra = '';
   if (m.id === 'poleas') {
@@ -183,15 +338,16 @@ function renderExercise(m, e) {
       <section class="card video-card">
         <h2 class="title-md">Mirá cómo se hace</h2>
         <div class="anim-box">
-          <div class="anim" id="anim"></div>
+          <div class="${real ? 'real-box' : 'anim'}" id="anim"></div>
           <div class="anim-ctrl">
             <button class="ctl" data-play aria-label="Pausar">❚❚</button>
             <button class="ctl spd" data-speed="0.5">Lento</button>
             <button class="ctl spd on" data-speed="1">Normal</button>
+            ${real && real.zones.length ? '<button class="ctl on" data-zones aria-pressed="true">Brillo ON</button>' : ''}
             <span class="anim-legend"><i class="lg-p"></i>Trabaja fuerte <i class="lg-s"></i>Ayuda</span>
           </div>
         </div>
-        ${videoBlock(e)}
+        ${real ? '' : videoBlock(e)}
       </section>
 
       <section class="card">
@@ -217,9 +373,23 @@ function renderExercise(m, e) {
   `;
   enableSwipe(prev && `#/m/${m.id}/${prev.id}`, next && `#/m/${m.id}/${next.id}`);
 
-  const player = Anim.mount(document.getElementById('anim'), m.id, e);
+  const box = document.getElementById('anim');
+  const player = real
+    ? mountRealMedia(box, Object.assign({}, real, { _machine: m.id, _exercise: e }))
+    : Anim.mount(box, m.id, e);
   const playBtn = $app.querySelector('[data-play]');
   if (!player) { $app.querySelector('.anim-box').remove(); return; }
+
+  /* Un GIF no se puede pausar ni frenar: en ese caso ocultamos esos botones */
+  if (real && !player.isVideo && /\.gif(\?|$)/i.test(real.src)) {
+    const hideGifCtl = () => {
+      if (!box.querySelector('#anim-fallback')) $app.querySelectorAll('[data-play], [data-speed]').forEach(b => b.hidden = true);
+      else $app.querySelectorAll('[data-play], [data-speed]').forEach(b => b.hidden = false);
+    };
+    hideGifCtl();
+    box.addEventListener('error', () => setTimeout(hideGifCtl, 0), true);
+  }
+
   playBtn.onclick = () => {
     const paused = player.toggle();
     playBtn.textContent = paused ? '▶' : '❚❚';
@@ -229,6 +399,13 @@ function renderExercise(m, e) {
     player.setSpeed(parseFloat(b.dataset.speed));
     $app.querySelectorAll('[data-speed]').forEach(x => x.classList.toggle('on', x === b));
   });
+  const zBtn = $app.querySelector('[data-zones]');
+  if (zBtn) zBtn.onclick = () => {
+    const on = player.toggleZones();
+    zBtn.textContent = on ? 'Brillo ON' : 'Brillo OFF';
+    zBtn.classList.toggle('on', on);
+    zBtn.setAttribute('aria-pressed', String(on));
+  };
 }
 
 function videoBlock(e) {
@@ -299,6 +476,7 @@ function enableSwipe(prevHref, nextHref) {
 
 function router() {
   if (swipeCleanup) { swipeCleanup(); swipeCleanup = null; }
+  if (mediaStop) { mediaStop(); mediaStop = null; }
   Anim.stopAll();
   const parts = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
   if (parts[0] === 'm') {
