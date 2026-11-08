@@ -323,3 +323,34 @@ video, .video-frame { width: 100%; border-radius: 14px; background: #000; displa
 .acc-rope { fill: none; stroke: #c9a227; stroke-width: 5; stroke-linecap: round; }
 .acc-fill { fill: var(--ink); }
 .acc-strap { fill: var(--accent); }
+
+/* ---------- Figura PRO (cuerpo con volumen) ---------- */
+.pb-skin { fill: #e3e5e9; stroke: #8b919b; stroke-width: .7; stroke-linejoin: round; }
+.pb-skin.pb-far { fill: #c4c8cf; stroke: #858b95; }
+.pb-shoe { fill: #3a3f49; stroke: #22262d; }
+.pb-joint { fill: #e3e5e9; stroke: none; }
+.pb-joint.pb-far { fill: #c4c8cf; }
+.pb-hip { stroke: none; }
+.pb-hi { fill: #fff; opacity: .55; }
+.pb-sh { fill: #1b2030; opacity: .13; }
+.pb-farg .pb-hi { opacity: .3; }
+.pb-hair { fill: #5b6170; }
+.pb-ear { fill: #d3d6db; stroke: #8b919b; stroke-width: .5; }
+.pb-eye { fill: #3a3f49; }
+.pb-nose { stroke-width: .7; }
+.pm-n { fill: #d5d8dd; stroke: #a7adb6; stroke-width: .45; }
+.pb-farg .pm-n { fill: #bcc1c8; stroke: #9aa0a9; }
+.pm-p { fill: #e0352b; stroke: #8f1a13; stroke-width: .55; }
+.pm-s { fill: #f0907c; stroke: #b5533f; stroke-width: .5; }
+.pm-fib { fill: none; stroke-width: .5; stroke-linecap: round; }
+.pm-n-fib { stroke: rgba(80, 88, 100, .28); }
+.pm-p-fib { stroke: rgba(90, 0, 0, .45); }
+.pm-s-fib { stroke: rgba(120, 30, 10, .3); }
+.pro-eq line { stroke-linecap: round; }
+.pro-eq .eq-metal-l { stroke: #9aa1ac; }
+.pro-eq .eq-pad-l { stroke: #2b2f37; }
+.pro-eq .eq-sled { stroke: #6b7280; }
+.anim.anim-pro { background: linear-gradient(#ffffff, #eef0f3); }
+.anim-pro .eq-floor { stroke: #c3c8cf; }
+.anim-pro .eq-plate { fill: #9aa1ac; stroke: #3a3f49; }
+.anim-pro .eq-hub { fill: #eef0f3; }
