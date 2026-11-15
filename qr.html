@@ -53,15 +53,20 @@
   <script src="js/anim-extra.js"></script>
   <script>
     const input = document.getElementById('base');
-    const def = location.href.replace(/qr\.html.*$/, '');
+    /* Carpeta donde está esta página, se abra como /qr, /qr.html o con ?parámetros.
+       Ej.: https://scomes02.github.io/qrgym/qr → https://scomes02.github.io/qrgym/ */
+    const def = new URL('.', location.href).href;
+    /* Una dirección que termina en /qr o /qr.html es la de esta misma página, no la de la guía */
+    const fixBase = b => b.replace(/\/qr(\.html)?\/?$/i, '/');
     let saved = null;
     try { saved = localStorage.getItem('qrgym-base'); } catch (e) {}
-    input.value = saved || def;
+    input.value = saved ? fixBase(saved) : def;
 
-    function draw() {
-      let base = input.value.trim() || def;
+    function draw(ev) {
+      let base = fixBase(input.value.trim() || def);
       if (!base.endsWith('/') && !base.endsWith('.html')) base += '/';
-      try { localStorage.setItem('qrgym-base', input.value.trim()); } catch (e) {}
+      // Solo se guarda lo que escribe la persona (no el valor automático)
+      if (ev) { try { localStorage.setItem('qrgym-base', input.value.trim()); } catch (e) {} }
       document.getElementById('posters').innerHTML = MACHINES.map(m => {
         const url = `${base}${base.endsWith('.html') ? '' : 'index.html'}?m=${m.id}`;
         let svg = '<p>Cargando QR…</p>';
