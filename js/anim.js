@@ -501,6 +501,8 @@ const Anim = (() => {
     (scene.props || []).forEach(pr => {
       switch (pr.type) {
         case 'bench': s += bench(pr.x1, pr.x2, pr.top, floor); break;
+        case 'mat': s += `<rect x="${pr.x1}" y="${floor - 4}" width="${pr.x2 - pr.x1}" height="4" rx="2" class="eq-mat"/>`; break;
+        case 'box': s += `<rect x="${pr.x}" y="${pr.top}" width="${pr.w}" height="${floor - pr.top}" rx="3" class="eq-box"/><line x1="${pr.x + 4}" y1="${pr.top + 6}" x2="${pr.x + pr.w - 4}" y2="${pr.top + 6}" class="eq-box-l"/>`; break;
         case 'rect': s += `<rect x="${pr.x}" y="${pr.y}" width="${pr.w}" height="${pr.h}" rx="${pr.r === undefined ? 4 : pr.r}" class="${pr.cls || 'eq-pad'}"/>`; break;
         case 'frame': s += ln(pr.p1, pr.p2, pr.w || 5, pr.cls || 'eq-metal-l'); break;
         case 'stack': {
@@ -556,7 +558,7 @@ const Anim = (() => {
   }
 
   // Capa de adelante (sobre la figura)
-  function propsFront(scene, J) {
+  function propsFront(scene, J, ph = 0) {
     let s = '';
     (scene.cables || []).forEach(c => {
       let p0, target;
@@ -568,8 +570,30 @@ const Anim = (() => {
     (scene.props || []).forEach(pr => {
       switch (pr.type) {
         case 'bar': s += plate(joint(J, pr.at || 'hand'), pr.r || 15); break;
-        case 'db': s += dumbbell(joint(J, pr.at || 'hand')); break;
+        case 'db': { const q = joint(J, pr.at || 'hand'); s += dumbbell([q[0] + (pr.dx || 0), q[1] + (pr.dy || 0)]); break; }
         case 'hipbar': s += plate([J.H[0] + 2, J.H[1] - 15], 15); break;
+        case 'kb': {
+          const q = joint(J, pr.at || 'hands'), r = pr.r || 9;
+          s += `<path d="M${f1(q[0] - 6)} ${f1(q[1] + 3)} Q${f1(q[0] - 6)} ${f1(q[1] - 5)} ${f1(q[0])} ${f1(q[1] - 5)} Q${f1(q[0] + 6)} ${f1(q[1] - 5)} ${f1(q[0] + 6)} ${f1(q[1] + 3)}" class="eq-kb-h"/>` +
+            circ([q[0], q[1] + 3 + r], r, 'eq-kb');
+          break;
+        }
+        case 'mark': {
+          // Marca roja de error: se ve solo en la postura "mal" (fase ≥ 0.5)
+          if ((pr.when === 'good') ? ph > 0.5 : (pr.when !== 'both' && ph < 0.5)) break;
+          const q = pr.p || (pr.seg ? segPoint(J, pr.seg, pr.i || 0, pr.t ?? .5, pr.side || 'back', pr.off ?? 0) : joint(J, pr.at));
+          s += circ([q[0] + (pr.dx || 0), q[1] + (pr.dy || 0)], pr.r || 11, pr.ok ? 'err-ok' : 'err-ring');
+          break;
+        }
+        case 'guide': {
+          if ((pr.when === 'good') ? ph > 0.5 : (pr.when === 'bad' && ph < 0.5)) break;
+          const a = Array.isArray(pr.p1) ? pr.p1 : joint(J, pr.p1);
+          let b = Array.isArray(pr.p2) ? pr.p2 : pr.p2 ? joint(J, pr.p2) : null;
+          if (pr.vertical) b = [a[0], a[1] - pr.vertical];
+          if (pr.horizontal) b = [a[0] + pr.horizontal, a[1]];
+          s += ln(a, b, 2, pr.cls || (pr.ok ? 'err-guide-ok' : 'err-guide'));
+          break;
+        }
         case 'smith': {
           const q = joint(J, pr.at || 'hand');
           s += plate([q[0], q[1] + (pr.dy || 0)], pr.r || 13);
@@ -627,6 +651,7 @@ const Anim = (() => {
         let d = [b[0] - a[0], b[1] - a[1]];
         const L = Math.hypot(d[0], d[1]);
         d = (pr.at !== 'toe' && L > 12) ? [d[0] / L, d[1] / L] : [0.707, -0.707];
+        if (pr.dir) d = pr.dir;
         if (d[1] > 0) d = [-d[0], -d[1]];
         scene._rail = { p: a, d };
       }
@@ -762,12 +787,12 @@ const Anim = (() => {
     const J = fk(scene, mix(A, B, p));
     if (pro) return `<g class="pro-eq" filter="url(#proShadow)">${propsBack(scene, J, floor, p)}</g>` +
       `<g class="pro-fig" filter="url(#proShadow)">${proFigure(J, P, Sx, p, animated)}</g>` +
-      `<g class="pro-eq" filter="url(#proShadow)">${propsFront(scene, J)}</g>`;
+      `<g class="pro-eq" filter="url(#proShadow)">${propsFront(scene, J, p)}</g>`;
     const sOp = animated ? (0.35 + 0.3 * p).toFixed(2) : 1, pOp = animated ? (0.55 + 0.45 * p).toFixed(2) : 1;
     return propsBack(scene, J, floor, p) + figureSVG(J) +
       `<g style="opacity:${sOp}">${musclesSVG(J, Sx, 'mu-s')}</g>` +
       `<g style="opacity:${pOp}">${musclesSVG(J, P, 'mu-p')}</g>` +
-      propsFront(scene, J);
+      propsFront(scene, J, p);
   }
 
   const players = new Set();

@@ -9,9 +9,13 @@
   .c div { display: flex; } .c svg { width: 50%; height: auto; }
 </style></head>
 <body><div class="g" id="g"></div>
-<script src="js/data.js"></script><script src="js/data-extra.js"></script><script src="js/config.js"></script><script src="js/graphics.js"></script><script src="js/anim.js"></script><script src="js/anim-extra.js"></script>
+<script src="js/data.js"></script><script src="js/data-extra.js"></script>
+  <script src="js/data-free.js"></script><script src="js/config.js"></script><script src="js/graphics.js"></script><script src="js/anim.js"></script><script src="js/anim-extra.js"></script>
+  <script src="js/anim-free.js"></script>
 <script>
-  const only = new URLSearchParams(location.search).get('m');
+  const qs = new URLSearchParams(location.search), only = qs.get('m');
+  const from = +(qs.get('from') || 0), cnt = +(qs.get('n') || 999), cols = qs.get('cols');
+  if (cols) document.getElementById('g').style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
   document.getElementById('g').innerHTML = MACHINES.filter(m => !only || m.id === only).flatMap(m => m.exercises.map(e =>
-    `<div class="c"><b>${m.short} · ${e.name}</b><div>${Anim.staticSVG(m.id, e, 0)}${Anim.staticSVG(m.id, e, 1)}</div></div>`)).join('');
+    `<div class="c"><b>${m.short} · ${e.name}</b><div>${Anim.staticSVG(m.id, e, 0)}${Anim.staticSVG(m.id, e, 1)}</div></div>`)).slice(from, from + cnt).join('');
 </script></body></html>

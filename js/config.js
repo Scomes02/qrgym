@@ -7,7 +7,8 @@
    prensa, press-banca, poleas, smith, curl-femoral, extension-cuadriceps,
    abductores, gemelos, dorsalera, remo-polea-baja, remo-t, pec-deck,
    press-inclinado, patada-burro, hip-thrust, remo-independiente,
-   press-pecho, press-hombros, hack, asistida, lumbares, scott, silla-romana
+   press-pecho, press-hombros, hack, asistida, lumbares, scott, silla-romana,
+   banco-abdominal, gluteo-pie, laterales-pie, mancuernas, colchoneta, cajon, pesa-rusa
    ============================================================ */
 const GYM_CONFIG = {
   name: 'Reaxion Fitness',
@@ -15,7 +16,7 @@ const GYM_CONFIG = {
   hidden: []
 };
 
-const GROUP_ORDER = ['Piernas', 'Glúteos', 'Pecho', 'Espalda', 'Hombros', 'Brazos', 'Core', 'Multiuso'];
+const GROUP_ORDER = ['Piernas', 'Glúteos', 'Pecho', 'Espalda', 'Hombros', 'Brazos', 'Core', 'Peso libre', 'Multiuso'];
 
 /* Aplica la configuración: saca las máquinas ocultas */
 (function () {

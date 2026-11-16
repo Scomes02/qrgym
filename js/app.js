@@ -5,6 +5,7 @@
      #/m/<maquina>           → todas las posiciones de una máquina (destino del QR)
      #/m/<maquina>/<ejerc>   → detalle del ejercicio
      #/musculo/<id>          → ejercicios de todas las máquinas para un músculo
+     #/rutina                → generador de rutinas (js/routine.js)
    También acepta ?m=<maquina> (útil para QR impresos).
    ============================================================ */
 
@@ -182,6 +183,7 @@ function renderHome() {
       <p class="eyebrow">${esc(GYM_CONFIG.name)} · Guía de máquinas</p>
       <h1 class="title-xl">Escaneá. Mirá.<br><span class="accent">Entrená bien.</span></h1>
       <p class="lead">Escaneá el QR de cualquier máquina y vas a ver todas las posiciones, qué músculos trabajás y cómo hacer cada ejercicio.</p>
+      <a class="btn rt-cta" href="#/rutina">📋 Armá tu rutina personalizada →</a>
     </section>
 
     <div class="home-head">
@@ -364,6 +366,11 @@ function renderExercise(m, e) {
         <h2 class="title-md">❌ Errores comunes</h2>
         <ul>${e.errors.map(s => `<li>${esc(s)}</li>`).join('')}</ul>
       </section>
+      <section class="card no-card">
+        <h2 class="title-md">🚫 Cómo NO hacerlo</h2>
+        <p class="lead-sm">Los errores más comunes, al lado de la forma correcta.</p>
+        <div class="err-list">${typeof ErrorGfx !== 'undefined' ? ErrorGfx.html(m, e) : ''}</div>
+      </section>
     </div>
 
     <nav class="pager">
@@ -484,6 +491,8 @@ function router() {
     if (!m) return renderHome();
     const e = parts[2] && m.exercises.find(x => x.id === parts[2]);
     e ? renderExercise(m, e) : renderMachine(m);
+  } else if (parts[0] === 'rutina') {
+    Routine.render($app);
   } else if (parts[0] === 'musculo') {
     renderMuscle(parts[1]);
   } else if (parts[0] === 'musculos') {
