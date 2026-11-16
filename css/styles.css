@@ -447,3 +447,19 @@ video, .video-frame { width: 100%; border-radius: 14px; background: #000; displa
 .topnav { scrollbar-width: none; }
 .topnav::-webkit-scrollbar { display: none; }
 @media (max-width: 420px) { .topnav { gap: 0; } .topnav a { padding: 6px 7px; font-size: 13px; } }
+.rt-hint { margin: -2px 0 10px; font-size: 13px; color: var(--muted); }
+.rt-err { margin: 10px 0 0; color: var(--accent); font-weight: 800; font-size: 14px; }
+.chip small { font-weight: 600; opacity: .7; font-size: 11px; }
+.rt-days { display: grid; gap: 10px; }
+.rt-dayrow { border: 1px solid var(--line); border-radius: 12px; padding: 10px; background: var(--bg); display: grid; gap: 8px; }
+.rt-dayrow .rt-num { justify-self: start; }
+.rt-dayrow.empty { border-color: var(--accent); }
+.rt-dayrow .chips { flex-wrap: wrap; }
+.rt-days .link-btn { justify-self: start; }
+.rt-note { margin: 12px 0 0; padding: 10px 12px; border-radius: 12px; background: var(--accent-soft, #fdecea); font-size: 14px; line-height: 1.45; }
+.rt-week { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 0; }
+.rt-week span { border: 1px solid var(--line); border-radius: 999px; padding: 5px 10px; font-size: 13px; background: var(--surface); }
+.rt-week b { color: var(--accent); margin-right: 2px; }
+.rt-week small, .rt-tag { color: var(--muted); font-weight: 700; font-size: 12px; }
+.rt-fixed { color: var(--accent); font-size: 11px; text-transform: uppercase; }
+.rt-field .chip { white-space: normal; text-align: left; max-width: 100%; }
