@@ -727,7 +727,7 @@ const Anim = (() => {
       'jalon-brazos-rectos': S({ towers: [['R', 'alta']], cables: [['R', 'alta', 'hand']],
         A: { torso: 160, a: [[150, 150]], l: [[10, -5]] }, B: { torso: 160, a: [[10, 10]], l: [[10, -5]] } }),
       'jalon-unilateral': S({ anchor: ['knee', [160, 186]], floor: 193, towers: [['R', 'alta']], cables: [['R', 'alta', 'hand']],
-        A: { torso: 180, a: [[165, 172], [5, 5]], l: [[0, -90]] }, B: { torso: 180, a: [[-15, 170], [5, 5]], l: [[0, -90]] } }),
+        A: { torso: 180, a: [[165, 172], [5, 5]], l: [[0, -90, -95]] }, B: { torso: 180, a: [[-15, 170], [5, 5]], l: [[0, -90, -95]] } }),
       'remo-unilateral-pie': S({ towers: [['R', 'media']], cables: [['R', 'media', 'hand']],
         A: { torso: 168, a: [[95, 95], [5, 30]], l: [[12, 0], [-15, -5]] }, B: { torso: 168, a: [[-50, 85], [5, 30]], l: [[12, 0], [-15, -5]] } }),
       'face-pull': S({ towers: [['R', 'alta']], cables: [['R', 'alta', 'hand']],
@@ -767,7 +767,7 @@ const Anim = (() => {
       'curl-femoral': S({ anchor: ['ankle2', [170, 190]], towers: [['R', 'baja']], cables: [['R', 'baja', 'ankle']],
         A: { torso: 172, a: [[100, 100]], l: [[5, -3], [0, 0]] }, B: { torso: 172, a: [[100, 100]], l: [[5, -110], [0, 0]] } }),
       'crunch-polea': S({ anchor: ['knee', [160, 186]], floor: 193, towers: [['R', 'alta']], cables: [['R', 'alta', 'hand']],
-        A: { torso: 178, a: [[150, 205]], l: [[0, -90]] }, B: { torso: 110, a: [[80, 135]], l: [[0, -90]] } }),
+        A: { torso: 178, a: [[150, 205]], l: [[0, -90, -95]] }, B: { torso: 110, a: [[80, 135]], l: [[0, -90, -95]] } }),
       'lenador': F({ towers: [['R', 'alta']], cables: [['R', 'alta', 'hands']],
         A: { a: [[-120, -120], [135, 135]] }, B: { a: [[35, 35], [-35, -35]] } }),
       'pallof': S({ towers: [['R', 'media']], cables: [['R', 'media', 'hand']],
@@ -855,5 +855,8 @@ const Anim = (() => {
       render(scene, A, B, p, expandMuscles(ex.primary), expandMuscles(ex.secondary), floor, false, pro) + '</svg>';
   }
 
-  return { mount, stopAll, getScene, staticSVG, register, S, F, lie, LYING, PRESS, PRO };
+  /* Posiciones de las articulaciones de una postura (para ajustar escenas) */
+  function joints(scene, pose) { return fk(scene, norm(pose, scene.view)); }
+
+  return { mount, stopAll, getScene, staticSVG, register, S, F, lie, LYING, PRESS, PRO, joints };
 })();

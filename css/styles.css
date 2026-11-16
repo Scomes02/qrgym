@@ -422,6 +422,19 @@ video, .video-frame { width: 100%; border-radius: 14px; background: #000; displa
 .rt-block h3 { font-size: 15px; margin: 12px 0 8px; }
 .rt-block h3 small { color: var(--muted); font-weight: 600; font-size: 12px; margin-left: 4px; }
 .rt-block ul { margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.55; }
+.rt-block ul.rt-how-list { list-style: none; padding-left: 0; }
+.rt-how-list > li { border-bottom: 1px dashed var(--line); }
+.rt-how-list > li:last-child { border-bottom: 0; }
+.rt-how summary { list-style: none; display: flex; align-items: center; gap: 10px; padding: 7px 0; cursor: pointer; }
+.rt-how summary::-webkit-details-marker { display: none; }
+.rt-how summary > span:first-child { flex: 1; }
+.rt-how-btn { flex: none; font-size: 12px; font-weight: 700; color: var(--accent); background: var(--accent-soft); border-radius: 999px; padding: 3px 10px; white-space: nowrap; }
+.rt-how-btn::after { content: ' ▾'; }
+.rt-how[open] .rt-how-btn::after { content: ' ▴'; }
+.rt-how[open] .rt-how-btn { font-size: 0; padding: 3px 8px; }
+.rt-how[open] .rt-how-btn::before { content: 'Ocultar'; font-size: 12px; }
+.rt-how-art { max-width: 340px; margin: 0 auto 10px; border-radius: 12px; background: var(--bg); }
+.rt-how-art svg { display: block; width: 100%; height: auto; }
 .rt-list { list-style: none; margin: 0; padding: 0; counter-reset: rt; display: grid; gap: 10px; }
 .rt-ex { counter-increment: rt; border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; background: var(--bg); }
 .rt-ex-main { display: flex; gap: 10px; align-items: center; }
@@ -440,6 +453,7 @@ video, .video-frame { width: 100%; border-radius: 14px; background: #000; displa
 .rt-finisher { margin: 10px 0 0; font-weight: 700; font-size: 14px; }
 .rt-foot { font-size: 13px; }
 @media print {
+  .rt-how-btn, .rt-how-art { display: none !important; }
   .topbar, .foot-note, .back, .no-print, .rt-cta { display: none !important; }
   .rt-day { break-inside: avoid; page-break-inside: avoid; border: 1px solid #999; }
   .rt-ex-art { width: 60px; flex-basis: 60px; }

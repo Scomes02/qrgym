@@ -34,7 +34,7 @@ const ErrorGfx = (() => {
     });
     const SUPINE = (A, B, props) => S({ anchor: ['hip', [180, 186]], floor: 198, vb: '40 70 250 136',
       props: [{ type: 'mat', x1: 50, x2: 270 }, ...props], A: Object.assign({ torso: 270 }, A), B: Object.assign({ torso: 270 }, B) });
-    const KNEES = [[135, 45, 90]];
+    const KNEES = [[120, 43, 90]];
 
     register('_err', {
       'prensa-bloqueo': PR({ l: [[160, 108, 214]] }, { l: [[141, 137, 228]] }, { at: 'knee' }),
@@ -79,7 +79,7 @@ const ErrorGfx = (() => {
         A: { torso: 261, a: [[70, 95]], l: [[75, -15]] }, B: { torso: 286, a: [[70, 95]], l: [[60, -24]] } }),
       'crunch': SUPINE({ torso: 240, a: cross(240), l: KNEES }, { torso: 204, a: [[215, 320]], l: KNEES }, [MARK({ at: 'head', r: 11 })]),
       'plancha': S({ anchor: ['elbow', [205, 191]], floor: 198, vb: '40 70 250 136', props: [{ type: 'mat', x1: 50, x2: 270 }, MARK({ at: 'hip', r: 12 })],
-        A: { torso: 104, a: [[0, 90]], l: [[-76, -76, 0]] }, B: { torso: 120, a: [[0, 90]], l: [[-84, -84, 0]] } }),
+        A: { torso: 99, a: [[0, 90]], l: [[-81, -81, -3]] }, B: { torso: 110, a: [[0, 90]], l: [[-88, -88, -10]] } }),
       'patada': S({ anchor: ['ankle2', [160, 184]], floor: 198, vb: '40 20 250 182',
         props: [{ type: 'rect', x: 110, y: 186, w: 120, h: 12, cls: 'eq-metal' }, { type: 'frame', p1: [256, 34], p2: [256, 198], w: 8 },
           { type: 'handle', at: 'hand' }, { type: 'roller', to: 'ankle', r: 7 }, TORSO_MARK(.2)],

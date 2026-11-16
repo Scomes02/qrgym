@@ -81,11 +81,11 @@ const Routine = (() => {
 
   /* ---------- Entrada en calor ---------- */
   const WARM = {
-    legs: ['Círculos de cadera: 10 por lado', 'Balanceos de pierna adelante–atrás: 10 por pierna', 'Sentadilla sin peso: 15', 'Puente de glúteos en colchoneta: 15', 'Zancadas caminando sin peso: 10'],
-    push: ['Círculos de brazos adelante y atrás: 10 + 10', 'Rotaciones de hombro con polea muy liviana: 15 por brazo', 'Flexiones con manos en el cajón: 10', 'Aperturas livianas o pec deck con poco peso: 15'],
-    pull: ['Círculos de brazos adelante y atrás: 10 + 10', 'Colgarse de la barra (o dorsalera liviana): 20 s', 'Face pull liviano en polea: 15', 'Rotación de columna en cuadrupedia: 8 por lado'],
-    upper: ['Círculos de brazos adelante y atrás: 10 + 10', 'Rotaciones de hombro con polea muy liviana: 15 por brazo', 'Face pull liviano: 15', 'Flexiones con manos en el cajón: 10'],
-    full: ['Círculos de cadera y de brazos: 10 de cada uno', 'Sentadilla sin peso: 15', 'Flexiones con manos en el cajón: 10', 'Face pull liviano en polea: 15', 'Puente de glúteos: 15']
+    legs: [['Círculos de cadera: 10 por lado', 'circ-cadera'], ['Balanceos de pierna adelante–atrás: 10 por pierna', 'balanceo'], ['Sentadilla sin peso: 15', 'sentadilla'], ['Puente de glúteos en colchoneta: 15', 'puente'], ['Zancadas caminando sin peso: 10', 'zancadas']],
+    push: [['Círculos de brazos adelante y atrás: 10 + 10', 'circ-brazos'], ['Rotaciones de hombro con polea muy liviana: 15 por brazo', 'face-pull'], ['Flexiones con manos en el cajón: 10', 'flex-cajon'], ['Aperturas livianas o pec deck con poco peso: 15', 'aperturas']],
+    pull: [['Círculos de brazos adelante y atrás: 10 + 10', 'circ-brazos'], ['Colgarse de la barra (o dorsalera liviana): 20 s', 'colgarse'], ['Face pull liviano en polea: 15', 'face-pull'], ['Rotación de columna en cuadrupedia: 8 por lado', 'cuadrupedia']],
+    upper: [['Círculos de brazos adelante y atrás: 10 + 10', 'circ-brazos'], ['Rotaciones de hombro con polea muy liviana: 15 por brazo', 'face-pull'], ['Colgarse de la barra: 20 s', 'colgarse'], ['Flexiones con manos en el cajón: 10', 'flex-cajon']],
+    full: [['Círculos de cadera y de brazos: 10 de cada uno', 'circ-brazos'], ['Sentadilla sin peso: 15', 'sentadilla'], ['Flexiones con manos en el cajón: 10', 'flex-cajon'], ['Face pull liviano en polea: 15', 'face-pull'], ['Puente de glúteos: 15', 'puente']]
   };
 
   /* ---------- Estiramientos (20–30 s cada uno) ---------- */
@@ -288,13 +288,14 @@ const Routine = (() => {
       const warmMin = f.edad === '60+' || f.edad === '40–59' ? '8–10' : '5–8';
       return {
         n: di + 1, key: day.key, name: day.name, tag,
-        warm: [`${warmMin} min de cardio suave (cinta, bici o elíptico) hasta entrar en calor`, ...WARM[day.kind].slice(0, 4),
-          `1–2 series de aproximación del primer ejercicio con poco peso (12 reps livianas + 6 reps a mitad de peso)`],
+        warm: [{ t: `${warmMin} min de cardio suave (cinta, bici o elíptico) hasta entrar en calor`, k: 'cardio' },
+          ...WARM[day.kind].slice(0, 4).map(([t, k]) => ({ t, k })),
+          ...(items[0] ? [{ t: `1–2 series de aproximación del primer ejercicio (${items[0].main.e.name}) con poco peso: 12 reps livianas + 6 reps a mitad de peso`, ref: items[0].main }] : [])],
         items,
         finisher: fat ? (combo
           ? '15–20 min de cardio moderado al final (cinta inclinada, bici o elíptico). Así quemás grasa sin perder la fuerza para las pesas.'
           : '15–20 min de cardio al final (cinta inclinada, bici o elíptico) a ritmo moderado.') : '',
-        stretch: stretchKeys.map(k => STRETCH[k])
+        stretch: stretchKeys.map(k => ({ t: STRETCH[k], k: 's-' + k }))
       };
     });
   }
@@ -370,7 +371,7 @@ const Routine = (() => {
       <p class="rt-tip muted">Tocá un ejercicio para ver cómo se hace. Si la máquina está ocupada, usá cualquiera de las <b>alternativas</b>: trabajan lo mismo. Descansá al menos un día entre sesiones que repiten los mismos músculos.</p>
       ${days.map(d => `<details class="rt-day card" ${d.n === 1 ? 'open' : ''}>
         <summary><span class="rt-num">Día ${d.n}</span><span class="rt-name">${esc(d.name)}${d.tag.length ? ` <small class="rt-tag">+ ${d.tag.join(' + ')}</small>` : ''}</span><span class="rt-count">${d.items.length} ejercicios</span></summary>
-        <div class="rt-block rt-warm"><h3>🔥 Entrada en calor <small>10 min</small></h3><ul>${d.warm.map(w => `<li>${esc(w)}</li>`).join('')}</ul></div>
+        <div class="rt-block rt-warm"><h3>🔥 Entrada en calor <small>10 min</small></h3><ul class="rt-how-list">${d.warm.map(howItem).join('')}</ul></div>
         <div class="rt-block"><h3>🏋️ Ejercicios</h3>
           <ol class="rt-list">${d.items.map(it => `<li class="rt-ex">
             <div class="rt-ex-main">
@@ -385,10 +386,30 @@ const Routine = (() => {
           </li>`).join('')}</ol>
           ${d.finisher ? `<p class="rt-finisher">🏃 ${esc(d.finisher)}</p>` : ''}
         </div>
-        <div class="rt-block rt-stretch"><h3>🧘 Estiramientos <small>al terminar</small></h3><ul>${d.stretch.map(s => `<li>${esc(s)}</li>`).join('')}</ul></div>
+        <div class="rt-block rt-stretch"><h3>🧘 Estiramientos <small>al terminar</small></h3><ul class="rt-how-list">${d.stretch.map(howItem).join('')}</ul></div>
       </details>`).join('')}
       <p class="muted rt-foot">Progresión: cuando completes todas las series con buena técnica, subí un poco el peso la semana siguiente. Ante cualquier molestia, consultá al profesor de sala.</p>
     </section>`;
+  }
+
+  /* Ítem de calentamiento / estiramiento con dibujo desplegable */
+  function howItem(w) {
+    if (typeof w === 'string') return `<li>${esc(w)}</li>`;
+    const has = w.ref || (w.k && Anim.getScene('_warm', w.k));
+    if (!has) return `<li>${esc(w.t)}</li>`;
+    const data = w.ref ? `data-m="${w.ref.m.id}" data-e="${w.ref.e.id}"` : `data-w="${w.k}"`;
+    return `<li><details class="rt-how" ${data}><summary><span>${esc(w.t)}</span><span class="rt-how-btn">Ver cómo</span></summary><div class="rt-how-art"></div></details></li>`;
+  }
+  function mountHow(d) {
+    const box = d.querySelector('.rt-how-art');
+    if (!d.open || box.childElementCount) return;
+    if (d.dataset.w) {
+      const g = (window.WARM_GFX || {})[d.dataset.w] || [[], []];
+      Anim.mount(box, '_warm', { id: d.dataset.w, name: d.querySelector('summary span').textContent, primary: g[0], secondary: g[1] });
+    } else {
+      const r = lookup(d.dataset.m + '/' + d.dataset.e);
+      if (r) Anim.mount(box, r.m.id, r.e);
+    }
   }
 
   /* Datos guardados con la versión anterior (un solo objetivo) */
@@ -463,6 +484,7 @@ const Routine = (() => {
         window.print();
       };
       if (q('[data-edit]')) q('[data-edit]').onclick = () => { showPlan = false; draw(); window.scrollTo(0, 0); };
+      app.querySelectorAll('.rt-how').forEach(d => d.addEventListener('toggle', () => mountHow(d)));
     };
     draw();
   }
