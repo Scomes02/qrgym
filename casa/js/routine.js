@@ -381,6 +381,7 @@ const Routine = (() => {
                 ${exLink(it.main, 'rt-ex-name')}
                 <span class="rt-machine">${esc(it.main.m.short)}${it.extra ? ' · <b class="rt-fixed">fijo</b>' : ''}</span>
                 <span class="rt-dose"><b>${esc(it.dose)}</b> · descanso ${esc(it.rest)}</span>
+                ${ytLink(`${it.main.e.name} técnica en casa`, '▶ Ejemplo en YouTube')}
               </div>
             </div>
             ${it.alts.length ? `<p class="rt-alts"><span>Alternativas:</span> ${it.alts.map(a => `${exLink(a)} <small>(${esc(a.m.short)})</small>`).join(' · ')}</p>` : ''}
@@ -393,13 +394,36 @@ const Routine = (() => {
     </section>`;
   }
 
+  /* ---------- Ejemplos en YouTube (búsqueda, así nunca queda un link roto) ---------- */
+  const YTQ = {
+    'cardio': 'trote suave en el lugar calentamiento',
+    'circ-cadera': 'círculos de cadera calentamiento', 'balanceo': 'balanceo de piernas calentamiento',
+    'sentadilla': 'sentadilla sin peso técnica', 'zancadas': 'zancadas sin peso técnica',
+    'circ-brazos': 'círculos de brazos calentamiento hombros', 'colgarse': 'colgarse de la barra dead hang',
+    'cuadrupedia': 'rotación torácica en cuadrupedia', 'puente': 'puente de glúteos técnica',
+    'face-pull': 'face pull técnica', 'flex-cajon': 'flexiones inclinadas en cajón', 'aperturas': 'aperturas con mancuernas técnica',
+    'flex-pared': 'flexiones en la pared técnica', 'plancha': 'plancha abdominal técnica', 'ytw': 'ejercicio Y T W boca abajo',
+    'superman': 'ejercicio superman lumbar', 'jacks': 'jumping jacks saltos de tijera',
+    's-cuadriceps': 'estiramiento de cuádriceps de pie', 's-isquios': 'estiramiento de isquiotibiales sentado',
+    's-gluteos': 'estiramiento de glúteo figura 4 acostado', 's-aductores': 'estiramiento mariposa aductores',
+    's-gemelos': 'estiramiento de gemelos contra la pared', 's-cadera': 'estiramiento flexor de cadera rodilla apoyada',
+    's-pecho': 'estiramiento de pecho en el marco de la puerta', 's-hombro': 'estiramiento de hombro brazo cruzado',
+    's-triceps': 'estiramiento de tríceps detrás de la cabeza', 's-dorsal': 'estiramiento de dorsal manos apoyadas cadera atrás',
+    's-biceps': 'estiramiento de bíceps contra la pared', 's-espalda': 'postura del niño estiramiento espalda',
+    's-abdomen': 'estiramiento cobra abdomen', 's-cuello': 'estiramiento de cuello lateral'
+  };
+  const ytURL = q => 'https://www.youtube.com/results?search_query=' + encodeURIComponent(q);
+  const ytLink = (q, label = '▶ Ver un ejemplo en YouTube') =>
+    `<a class="yt-link rt-yt" href="${ytURL(q)}" target="_blank" rel="noopener">${label}</a>`;
+
   /* Ítem de calentamiento / estiramiento con dibujo desplegable */
   function howItem(w) {
     if (typeof w === 'string') return `<li>${esc(w)}</li>`;
     const has = w.ref || (w.k && Anim.getScene('_warm', w.k));
-    if (!has) return `<li>${esc(w.t)}</li>`;
+    if (!has) return `<li>${esc(w.t)} ${ytLink(YTQ[w.k] || w.t, '▶ YouTube')}</li>`;
     const data = w.ref ? `data-m="${w.ref.m.id}" data-e="${w.ref.e.id}"` : `data-w="${w.k}"`;
-    return `<li><details class="rt-how" ${data}><summary><span>${esc(w.t)}</span><span class="rt-how-btn">Ver cómo</span></summary><div class="rt-how-art"></div></details></li>`;
+    const q = w.ref ? `${w.ref.e.name} técnica en casa` : (YTQ[w.k] || w.t);
+    return `<li><details class="rt-how" ${data}><summary><span>${esc(w.t)}</span><span class="rt-how-btn">Ver cómo</span></summary><div class="rt-how-art"></div>${ytLink(q)}</details></li>`;
   }
   function mountHow(d) {
     const box = d.querySelector('.rt-how-art');

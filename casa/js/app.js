@@ -413,7 +413,7 @@ function videoBlock(e) {
     return `<div class="video-frame"><iframe src="https://www.youtube-nocookie.com/embed/${yt[1]}" title="${esc(e.name)}" allowfullscreen loading="lazy"></iframe></div>`;
   }
   const q = encodeURIComponent(`${e.name} técnica correcta en casa`);
-  return `<a class="yt-link" href="https://www.youtube.com/results?search_query=${q}" target="_blank" rel="noopener">▶ Ver más ejemplos en YouTube</a>`;
+  return `<a class="yt-btn" href="https://www.youtube.com/results?search_query=${q}" target="_blank" rel="noopener"><span>▶</span> Ver un ejemplo en YouTube</a>`;
 }
 
 /* ---------------- Búsqueda por músculo ---------------- */

@@ -494,3 +494,12 @@ video, .video-frame { width: 100%; border-radius: 14px; background: #000; displa
 :root[data-theme="dark"] .eq-door, .theme-dark .eq-door { fill: #5a5246; stroke: #7a6e5c; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .eq-door { fill: #4a4439; stroke: #6d6252; } }
 .eq-towel { stroke: #e9d8a6; stroke-linecap: round; }
+
+/* ---------- Ejemplos en YouTube ---------- */
+.yt-btn { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 12px auto 0; max-width: 420px; padding: 11px 14px;
+  border-radius: 12px; background: #ff0033; color: #fff; font-weight: 800; font-size: 15px; text-decoration: none; }
+.yt-btn span { display: inline-grid; place-items: center; width: 26px; height: 18px; border-radius: 5px; background: #fff; color: #ff0033; font-size: 11px; }
+.yt-btn:hover { filter: brightness(1.08); }
+.rt-yt { margin: 2px 0 10px; font-size: 13px; color: #ff3355; }
+.rt-ex-info .rt-yt { display: inline-block; margin: 4px 0 0; font-size: 12px; }
+@media print { .yt-btn, .rt-yt { display: none !important; } }
