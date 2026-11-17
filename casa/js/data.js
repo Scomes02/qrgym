@@ -1,0 +1,446 @@
+/* ============================================================
+   EnCasa — Ejercicios para hacer en casa (calistenia y más)
+   Cada "zona" agrupa ejercicios según lo que necesitás.
+   ex(id, nombre, categoría, nivel, series, [principales], [secundarios],
+      textoPosición, [pasos], [consejos], [errores])
+   ============================================================ */
+
+const MUSCLES = {
+  pecho_sup:     'Pecho superior (clavicular)',
+  pecho_inf:     'Pecho medio / inferior',
+  deltoide_ant:  'Deltoides anterior',
+  deltoide_lat:  'Deltoides lateral',
+  deltoide_post: 'Deltoides posterior',
+  trapecio:      'Trapecio',
+  romboides:     'Romboides / espalda media',
+  dorsal:        'Dorsal ancho',
+  lumbar:        'Lumbares',
+  biceps:        'Bíceps / braquial',
+  triceps:       'Tríceps',
+  antebrazo:     'Antebrazo',
+  abdomen:       'Recto abdominal',
+  oblicuos:      'Oblicuos',
+  cuadriceps:    'Cuádriceps',
+  aductores:     'Aductores',
+  abductores:    'Glúteo medio (abductores)',
+  gluteos:       'Glúteo mayor',
+  isquios:       'Isquiotibiales',
+  gemelos:       'Gemelos / sóleo'
+};
+
+const INI = { type: 'inicio' };
+const ex = (id, name, cat, level, sets, primary, secondary, posText, steps, tips, errors) =>
+  ({ id, name, cat, level, sets, primary, secondary, pos: INI, posText, steps, tips, errors, ajustes: [], video: '' });
+
+const MACHINES = [
+  /* ===================== PIERNAS Y GLÚTEOS ===================== */
+  {
+    id: 'piernas', name: 'Piernas y glúteos sin equipo', short: 'Piernas y glúteos', group: 'Sin equipo',
+    desc: 'Solo con tu peso: sentadillas, zancadas, puentes y saltos. Cuando te queden fáciles, sumá una mochila con peso o hacelos más lentos.',
+    safety: [
+      'Entrená descalzo o con zapatillas firmes, sobre un piso que no resbale.',
+      'Dejá libre un espacio de 2 × 2 metros sin muebles cerca.',
+      'Si te duele la rodilla, achicá el recorrido y hacé los ejercicios sin salto.'
+    ],
+    exercises: [
+      ex('sentadilla', 'Sentadilla', 'Cuádriceps', 'Principiante', '4x15', ['cuadriceps', 'gluteos'], ['isquios', 'aductores'],
+        'De pie, pies al ancho de hombros con las puntas un poco hacia afuera. Brazos al frente para equilibrarte.',
+        ['Llevá la cadera hacia atrás y abajo, como si te sentaras.', 'Bajá hasta que los muslos queden paralelos al piso (o lo que puedas sin dolor).', 'Subí empujando el piso con todo el pie.'],
+        ['Pecho alto y mirada al frente.', 'Las rodillas van en la misma dirección que las puntas.'],
+        ['Levantar los talones.', 'Cerrar las rodillas hacia adentro al subir.']),
+      ex('sentadilla-sumo', 'Sentadilla sumo', 'Aductores', 'Principiante', '4x15', ['aductores', 'gluteos'], ['cuadriceps'],
+        'Pies bien abiertos (más que los hombros) y puntas hacia afuera 30–45°. Manos juntas al pecho.',
+        ['Bajá derecho abriendo las rodillas hacia las puntas.', 'Llegá hasta que los muslos queden paralelos al piso.', 'Subí apretando glúteos y la cara interna del muslo.'],
+        ['Torso bien vertical.', 'Si te cuesta el equilibrio, apoyá una mano en una silla.'],
+        ['Puntas al frente con los pies abiertos.', 'Inclinar el torso hacia adelante.']),
+      ex('zancada-atras', 'Zancada hacia atrás', 'Cuádriceps', 'Principiante', '3x10 c/pierna', ['cuadriceps', 'gluteos'], ['isquios', 'aductores'],
+        'De pie, pies al ancho de cadera, manos en la cintura.',
+        ['Dá un paso largo hacia atrás.', 'Bajá hasta que la rodilla de atrás casi toque el piso.', 'Empujá con el talón de adelante y volvé a juntar los pies.'],
+        ['Hacia atrás es más amable con la rodilla que hacia adelante.', 'Peso en la pierna de adelante.'],
+        ['Paso corto: la rodilla de adelante pasa mucho la punta.', 'Inclinarse hacia adelante.']),
+      ex('zancada-lateral', 'Zancada lateral', 'Aductores', 'Intermedio', '3x10 c/lado', ['cuadriceps', 'aductores'], ['gluteos'],
+        'De pie con los pies juntos, manos al pecho.',
+        ['Dá un paso grande hacia un costado.', 'Bajá flexionando esa rodilla y llevando la cadera atrás; la otra pierna queda estirada.', 'Empujá y volvé al centro.'],
+        ['Los dos pies apoyados completos, puntas al frente.', 'Vas a sentir estirar la cara interna de la pierna estirada.'],
+        ['Despegar el talón de la pierna que se flexiona.', 'Curvar la espalda.']),
+      ex('sentadilla-pared', 'Sentadilla isométrica en la pared', 'Cuádriceps', 'Principiante', '3x30–45 s', ['cuadriceps'], ['gluteos'],
+        'Espalda apoyada en la pared y pies unos 50 cm adelante.',
+        ['Deslizá la espalda hacia abajo hasta que las rodillas queden a 90°.', 'Quedate quieto respirando normal.', 'Subí deslizando la espalda.'],
+        ['Rodillas arriba de los tobillos, no más adelante.', 'Si es mucho, quedate un poco más arriba.'],
+        ['Apoyar las manos en los muslos para descansar.', 'Aguantar la respiración.']),
+      ex('puente', 'Puente de glúteos', 'Glúteo', 'Principiante', '3x15', ['gluteos'], ['isquios', 'lumbar'],
+        'Boca arriba, rodillas flexionadas y pies apoyados al ancho de cadera, cerca de la cola.',
+        ['Apretá los glúteos y subí la cadera.', 'Arriba quedan rodillas, cadera y hombros en línea.', 'Bajá lento sin apoyar del todo.'],
+        ['Empujá con los talones.', 'Pausá 2 segundos arriba.'],
+        ['Arquear la zona lumbar en vez de usar el glúteo.', 'Pies demasiado lejos (trabaja más el isquio).']),
+      ex('puente-una-pierna', 'Puente a una pierna', 'Glúteo', 'Intermedio', '3x10 c/pierna', ['gluteos'], ['isquios'],
+        'Como el puente, pero con una pierna estirada en el aire.',
+        ['Estirá una pierna alineada con el muslo de la otra.', 'Subí la cadera empujando con el talón apoyado.', 'Bajá lento manteniendo la cadera derecha.'],
+        ['La cadera no se tiene que torcer para un costado.'], ['Apoyar la pierna del aire.', 'Subir con impulso.']),
+      ex('patada-cuadrupedia', 'Patada de glúteo en cuadrupedia', 'Glúteo', 'Principiante', '3x15 c/pierna', ['gluteos'], ['isquios'],
+        'En cuatro apoyos: manos debajo de los hombros y rodillas debajo de la cadera.',
+        ['Con la rodilla doblada a 90°, empujá la planta del pie hacia el techo.', 'Subí hasta que el muslo quede en línea con el cuerpo.', 'Bajá sin apoyar la rodilla.'],
+        ['Abdomen firme para que la espalda no se mueva.'], ['Arquear la espalda para subir más alto.', 'Girar la cadera.']),
+      ex('abduccion-pie', 'Elevación lateral de pierna de pie', 'Glúteo medio', 'Principiante', '3x15 c/lado', ['abductores'], ['gluteos'],
+        'De pie al lado de una silla, agarrado del respaldo. Cuerpo derecho.',
+        ['Subí la pierna de afuera hacia el costado, estirada y con la punta al frente.', 'Llegá hasta unos 40°, sin inclinar el torso.', 'Bajá lento sin apoyar el pie.'],
+        ['Con una banda en los tobillos es más difícil.', 'También se puede hacer acostado de costado.'], ['Inclinar el torso para subir más.', 'Girar la punta hacia arriba.']),
+      ex('gemelos', 'Elevación de talones en escalón', 'Gemelos', 'Principiante', '4x20', ['gemelos'], [],
+        'Parado en el borde de un escalón con la mitad del pie, sosteniéndote de la pared o la baranda.',
+        ['Bajá los talones por debajo del escalón.', 'Subí en punta de pie lo más alto posible.', 'Pausá 1 segundo arriba y bajá lento.'],
+        ['A una pierna es mucho más difícil.', 'Sin escalón también sirve, en el piso.'], ['Rebotar abajo.', 'Hacerlo rápido y corto.']),
+      ex('sentadilla-salto', 'Sentadilla con salto', 'Potencia', 'Intermedio', '4x10', ['cuadriceps', 'gluteos'], ['gemelos'],
+        'Igual que la sentadilla. Espacio libre arriba y piso que no resbale.',
+        ['Bajá a media sentadilla.', 'Saltá con fuerza estirando todo el cuerpo.', 'Caé suave, con las rodillas flexionadas, y encadená la siguiente.'],
+        ['El aterrizaje tiene que ser silencioso.'], ['Caer con las piernas rectas.', 'Rodillas hacia adentro al caer.']),
+      ex('buenos-dias', 'Buenos días (bisagra de cadera)', 'Isquiotibiales', 'Principiante', '3x15', ['isquios', 'gluteos'], ['lumbar'],
+        'De pie, pies al ancho de cadera, manos detrás de la cabeza o cruzadas al pecho.',
+        ['Llevá la cadera hacia atrás con las rodillas apenas flexionadas.', 'Bajá el torso con la espalda recta hasta sentir el estiramiento atrás de las piernas.', 'Volvé apretando los glúteos.'],
+        ['Es el movimiento base del peso muerto.'], ['Redondear la espalda.', 'Flexionar mucho las rodillas.'])
+    ]
+  },
+
+  /* ===================== EMPUJE: PECHO, HOMBROS Y TRÍCEPS ===================== */
+  {
+    id: 'empuje', name: 'Pecho, hombros y tríceps sin equipo', short: 'Flexiones y empuje', group: 'Sin equipo',
+    desc: 'Todas las variantes de flexiones, de la más fácil (en la pared) a la más difícil. Elegí la que te deje hacer entre 8 y 15 con buena técnica.',
+    safety: [
+      'Manos apoyadas firmes, con los dedos abiertos.',
+      'Si te duelen las muñecas, apoyá los puños o usá dos libros como agarre.',
+      'Cuerpo siempre recto: si la cadera se cae, pasá a una variante más fácil.'
+    ],
+    exercises: [
+      ex('flexiones-pared', 'Flexiones en la pared', 'Pecho', 'Principiante', '3x15', ['pecho'], ['triceps', 'deltoide_ant'],
+        'De pie frente a una pared, a un paso largo. Manos en la pared a la altura del pecho, un poco más abiertas que los hombros.',
+        ['Doblá los codos y acercá el pecho a la pared.', 'Empujá hasta estirar los brazos.', 'Mantené el cuerpo recto como una tabla.'],
+        ['Cuanto más lejos los pies, más difícil.'], ['Doblar la cadera.', 'Codos abiertos en cruz.']),
+      ex('flexiones-rodillas', 'Flexiones con rodillas apoyadas', 'Pecho', 'Principiante', '3x12', ['pecho'], ['triceps', 'deltoide_ant'],
+        'Manos debajo de los hombros (un poco más abiertas) y rodillas apoyadas en el piso.',
+        ['Bajá el pecho hacia el piso con el cuerpo recto de rodillas a cabeza.', 'Codos a unos 45° del cuerpo.', 'Empujá hasta estirar los brazos.'],
+        ['Poné un almohadón debajo de las rodillas.'], ['Sacar la cola hacia arriba.', 'Bajar solo la cabeza.']),
+      ex('flexiones', 'Flexiones de brazos', 'Pecho', 'Intermedio', '4x10', ['pecho'], ['triceps', 'deltoide_ant', 'abdomen'],
+        'Plancha alta: manos apenas más abiertas que los hombros, cuerpo recto de cabeza a talones.',
+        ['Bajá hasta que el pecho quede a un puño del piso.', 'Codos a unos 45° del cuerpo, no en cruz.', 'Empujá el piso hasta estirar los brazos.'],
+        ['Apretá glúteos y abdomen todo el tiempo.', 'Mirá un poco adelante de las manos.'],
+        ['Cadera caída o muy arriba.', 'Recorrido a medias.']),
+      ex('flexiones-abiertas', 'Flexiones abiertas', 'Pecho', 'Intermedio', '3x10', ['pecho'], ['deltoide_ant'],
+        'Como la flexión, con las manos bien más abiertas que los hombros.',
+        ['Bajá controlando hasta cerca del piso.', 'Empujá sintiendo el pecho.'],
+        ['Trabaja más el pecho y menos el tríceps.'], ['Abrir tanto que duela el hombro.']),
+      ex('flexiones-diamante', 'Flexiones diamante (tríceps)', 'Tríceps', 'Avanzado', '3x8', ['triceps'], ['pecho', 'deltoide_ant'],
+        'Manos juntas debajo del pecho formando un rombo con pulgares e índices.',
+        ['Bajá con los codos pegados al cuerpo.', 'Tocá las manos con el pecho.', 'Empujá hasta arriba.'],
+        ['Si es muy difícil, hacela con rodillas apoyadas.'], ['Abrir los codos.', 'Hundir la cadera.']),
+      ex('pike', 'Flexión en pica (hombros)', 'Hombros', 'Intermedio', '3x8', ['deltoide_ant', 'triceps'], ['deltoide_lat', 'pecho_sup'],
+        'Desde la flexión, caminá con los pies hacia las manos y subí la cadera: el cuerpo forma una V invertida.',
+        ['Doblá los codos llevando la cabeza hacia el piso, entre las manos.', 'Empujá hasta estirar los brazos.', 'La cadera se queda arriba.'],
+        ['Con los pies en una silla es más difícil (casi un press de hombros).'], ['Bajar la cadera y convertirla en flexión común.', 'Codos muy abiertos.']),
+      ex('plancha-flexion', 'Plancha arriba-abajo', 'Tríceps', 'Intermedio', '3x10', ['triceps', 'abdomen'], ['deltoide_ant', 'pecho'],
+        'Plancha sobre los antebrazos, pies al ancho de cadera.',
+        ['Apoyá una mano y estirá ese brazo, después el otro: quedás en plancha alta.', 'Volvé a bajar a los antebrazos de a un brazo.', 'Alterná con qué brazo empezás.'],
+        ['Pies un poco abiertos: así la cadera no se balancea.'], ['Mover la cadera de lado a lado.', 'Ir muy rápido.'])
+    ]
+  },
+
+  /* ===================== ESPALDA Y POSTURA ===================== */
+  {
+    id: 'espalda', name: 'Espalda y postura sin equipo', short: 'Espalda y postura', group: 'Sin equipo',
+    desc: 'Ejercicios boca abajo y en cuatro apoyos para fortalecer la espalda, mejorar la postura y cuidar la zona lumbar. Para dorsales, mirá también la barra y la mesa.',
+    safety: [
+      'Usá una colchoneta o una toalla gruesa.',
+      'Movimientos lentos y controlados, sin tirones.',
+      'Si sentís pinchazos en la zona lumbar, achicá el recorrido.'
+    ],
+    exercises: [
+      ex('superman', 'Superman', 'Lumbares', 'Principiante', '3x12', ['lumbar', 'gluteos'], ['romboides', 'isquios'],
+        'Boca abajo, brazos estirados adelante y piernas estiradas atrás.',
+        ['Despegá a la vez brazos, pecho y piernas del piso.', 'Sostené 2 segundos arriba.', 'Bajá lento.'],
+        ['Mirá el piso: el cuello sigue la línea de la espalda.'], ['Subir de golpe.', 'Levantar la cabeza mirando al frente.']),
+      ex('ytw', 'Y-T-W boca abajo', 'Espalda media', 'Principiante', '3x8 de cada letra', ['romboides', 'deltoide_post'], ['trapecio', 'lumbar'],
+        'Boca abajo con la frente apoyada en una toalla y los brazos estirados.',
+        ['Y: subí los brazos estirados en diagonal hacia adelante.', 'T: abrilos en cruz y subilos.', 'W: doblá los codos y llevalos hacia atrás apretando las escápulas.'],
+        ['Pulgares hacia el techo.', 'Es liviano pero se siente mucho: no hace falta peso.'], ['Subir con la zona lumbar en vez de la espalda alta.']),
+      ex('nadador', 'Nadador', 'Lumbares', 'Intermedio', '3x20 (10 c/lado)', ['lumbar', 'gluteos'], ['deltoide_post', 'romboides'],
+        'Boca abajo como el superman, brazos y piernas apenas despegados del piso.',
+        ['Subí brazo derecho y pierna izquierda.', 'Cambiá a brazo izquierdo y pierna derecha, como pataleando en el agua.', 'Ritmo constante sin apoyar.'],
+        ['Abdomen firme, cadera apoyada.'], ['Hacerlo tan rápido que se descontrola.']),
+      ex('bird-dog', 'Bird dog (perro de caza)', 'Core / lumbar', 'Principiante', '3x10 c/lado', ['lumbar', 'gluteos'], ['abdomen', 'deltoide_post'],
+        'En cuatro apoyos: manos debajo de los hombros, rodillas debajo de la cadera.',
+        ['Estirá a la vez un brazo adelante y la pierna contraria atrás.', 'Quedate 2 segundos con el cuerpo como una mesa.', 'Volvé y cambiá de lado.'],
+        ['Imaginá un vaso de agua apoyado en la espalda.'], ['Arquear la espalda al estirar la pierna.', 'Girar la cadera.']),
+      ex('remo-puerta', 'Remo en el marco de la puerta', 'Espalda', 'Principiante', '3x12', ['dorsal', 'romboides'], ['biceps', 'deltoide_post'],
+        'Puerta abierta: agarrá el marco (o los dos picaportes con una toalla) con los pies cerca de la puerta y el cuerpo inclinado hacia atrás.',
+        ['Con los brazos estirados, dejate caer hacia atrás con el cuerpo recto.', 'Tirá llevando el pecho hacia la puerta y los codos atrás.', 'Volvé lento.'],
+        ['Cuanto más cerca de la puerta los pies, más difícil.', 'Revisá que el marco o los picaportes estén firmes.'],
+        ['Doblar la cadera en vez de tirar con la espalda.', 'Soltarse de golpe.']),
+      ex('curl-toalla', 'Curl de bíceps con toalla', 'Bíceps', 'Principiante', '3x12', ['biceps'], ['antebrazo'],
+        'Pisá el centro de una toalla con un pie y agarrá las puntas con las palmas hacia arriba.',
+        ['Tirá hacia arriba doblando los codos mientras el pie hace fuerza hacia abajo.', 'Subí en 3 segundos peleando contra el pie.', 'Bajá lento.'],
+        ['Vos regulás la dificultad: más fuerza con el pie, más difícil.'], ['Despegar los codos del cuerpo.'])
+    ]
+  },
+
+  /* ===================== ABDOMEN Y CORE ===================== */
+  {
+    id: 'core', name: 'Abdomen y core', short: 'Abdomen y core', group: 'Sin equipo',
+    desc: 'Abdominales, oblicuos y planchas en el piso. Combiná uno de cada tipo: uno que flexione el tronco, uno de plancha y uno de giro.',
+    safety: [
+      'Usá colchoneta o toalla para no lastimar la espalda.',
+      'La zona lumbar pegada al piso en los ejercicios boca arriba.',
+      'Exhalá cuando hacés la fuerza.'
+    ],
+    exercises: [
+      ex('crunch', 'Crunch abdominal', 'Abdominales', 'Principiante', '3x15', ['abdomen'], ['oblicuos'],
+        'Boca arriba, rodillas flexionadas, pies apoyados y brazos cruzados al pecho.',
+        ['Exhalá y despegá solo los omóplatos del piso.', 'Apretá 1 segundo arriba.', 'Bajá lento.'],
+        ['Acercá las costillas a la cadera; no hace falta subir alto.'], ['Tirar del cuello con las manos.', 'Subir con impulso.']),
+      ex('crunch-inverso', 'Crunch inverso', 'Abdominales', 'Intermedio', '3x12', ['abdomen'], ['oblicuos'],
+        'Boca arriba, brazos al costado y piernas levantadas con las rodillas a 90°.',
+        ['Llevá las rodillas al pecho despegando la cola del piso.', 'Bajá lento hasta volver a 90°.'],
+        ['El movimiento es corto: subí la cadera, no balancees las piernas.'], ['Usar impulso de las piernas.', 'Despegar la cabeza.']),
+      ex('plancha', 'Plancha', 'Core', 'Principiante', '3x30–45 s', ['abdomen'], ['oblicuos', 'deltoide_ant', 'gluteos'],
+        'Antebrazos apoyados con los codos debajo de los hombros, piernas estiradas en punta de pie.',
+        ['Subí la cadera hasta que el cuerpo quede recto de cabeza a talones.', 'Apretá glúteos y abdomen.', 'Respirá normal y sostené.'],
+        ['Mejor 20 segundos perfectos que 1 minuto con la cadera caída.'], ['Cadera caída.', 'Cola muy arriba.']),
+      ex('plancha-lateral', 'Plancha lateral', 'Oblicuos', 'Intermedio', '3x20–30 s c/lado', ['oblicuos'], ['abdomen', 'abductores'],
+        'De costado, apoyado en un antebrazo con el codo debajo del hombro y los pies uno sobre otro.',
+        ['Subí la cadera hasta que el cuerpo quede recto.', 'Sostené sin dejar caer la cadera.', 'Cambiá de lado.'],
+        ['Más fácil: con la rodilla de abajo apoyada.'], ['Cadera hacia atrás.', 'Hombro hundido.']),
+      ex('dead-bug', 'Dead bug (bicho muerto)', 'Core', 'Principiante', '3x10 c/lado', ['abdomen'], ['oblicuos'],
+        'Boca arriba, brazos hacia el techo y piernas arriba con las rodillas a 90°.',
+        ['Bajá un brazo hacia atrás y la pierna contraria hacia adelante a la vez.', 'Sin despegar la zona lumbar del piso.', 'Volvé y cambiá de lado.'],
+        ['Despacio: es un ejercicio de control.'], ['Arquear la espalda baja.', 'Moverse rápido.']),
+      ex('bicicleta', 'Bicicleta', 'Oblicuos', 'Intermedio', '3x20 (10 c/lado)', ['oblicuos', 'abdomen'], [],
+        'Boca arriba, manos a los costados de la cabeza y piernas en el aire.',
+        ['Llevá el codo derecho hacia la rodilla izquierda mientras estirás la derecha.', 'Cambiá de lado como pedaleando.', 'Hombros siempre despegados.'],
+        ['El giro sale del tronco, no del codo.'], ['Tirar del cuello.', 'Ir tan rápido que no girás.']),
+      ex('hollow', 'Hollow hold (posición de cuchara)', 'Core', 'Avanzado', '3x20–30 s', ['abdomen'], ['oblicuos', 'cuadriceps'],
+        'Boca arriba, brazos estirados detrás de la cabeza.',
+        ['Despegá hombros y piernas del piso formando una banana.', 'Zona lumbar pegada al piso.', 'Sostené respirando.'],
+        ['Más fácil: rodillas dobladas y brazos al costado.'], ['Arquear la zona lumbar.']),
+      ex('elevacion-piernas', 'Elevación de piernas', 'Abdominales', 'Intermedio', '3x12', ['abdomen'], ['oblicuos'],
+        'Boca arriba, piernas estiradas y manos debajo de la cola.',
+        ['Subí las piernas estiradas hasta la vertical.', 'Bajalas lento sin tocar el piso.'],
+        ['Si molesta la zona lumbar, doblá un poco las rodillas.'], ['Arquear la espalda al bajar.', 'Dejar caer las piernas.']),
+      ex('russian-twist', 'Giros rusos', 'Oblicuos', 'Intermedio', '3x20 (10 c/lado)', ['oblicuos'], ['abdomen'],
+        'Sentado, rodillas flexionadas y torso inclinado hacia atrás. Manos juntas (o una botella).',
+        ['Girá el torso llevando las manos a un costado.', 'Pasá por el centro y girá al otro lado.'],
+        ['Más difícil: con los pies en el aire.'], ['Mover solo los brazos.', 'Redondear la espalda.']),
+      ex('toques-talon', 'Toques de talón', 'Oblicuos', 'Principiante', '3x20 (10 c/lado)', ['oblicuos'], ['abdomen'],
+        'Boca arriba, rodillas flexionadas, hombros despegados y brazos al costado.',
+        ['Inclinate de costado hasta tocar el talón con la mano.', 'Alterná de un lado al otro.'], ['Hombros siempre despegados.'], ['Apoyar la cabeza entre repeticiones.']),
+      ex('plancha-toques', 'Plancha con toques de hombro', 'Core', 'Intermedio', '3x20 (10 c/lado)', ['abdomen', 'oblicuos'], ['deltoide_ant', 'triceps'],
+        'Plancha alta con los brazos estirados y los pies abiertos.',
+        ['Llevá una mano a tocar el hombro contrario.', 'Volvé a apoyarla y cambiá de mano.', 'La cadera no se mueve.'],
+        ['Cuanto más juntos los pies, más difícil.'], ['Balancear la cadera.', 'Cola muy arriba.']),
+      ex('mountain-climbers', 'Escaladores (mountain climbers)', 'Core / cardio', 'Intermedio', '3x30 s', ['abdomen', 'cuadriceps'], ['deltoide_ant', 'oblicuos'],
+        'Plancha alta, manos debajo de los hombros.',
+        ['Llevá una rodilla al pecho.', 'Cambiá de pierna rápido como corriendo.', 'La cadera se mantiene baja.'],
+        ['Primero lento y prolijo, después rápido.'], ['Subir la cola.', 'Rebotar con los hombros.'])
+    ]
+  },
+
+  /* ===================== CARDIO Y HIIT ===================== */
+  {
+    id: 'cardio', name: 'Cardio y HIIT en casa', short: 'Cardio y HIIT', group: 'Sin equipo',
+    desc: 'Para subir las pulsaciones sin salir de casa. Usalos en circuito: 30 segundos de trabajo y 30 de descanso, o como cierre de la rutina.',
+    safety: [
+      'Zapatillas con buena amortiguación y piso que no resbale.',
+      'Si tenés vecinos abajo, elegí las variantes sin salto.',
+      'Tomá agua y parate si te mareás.'
+    ],
+    exercises: [
+      ex('jumping-jacks', 'Saltos de tijera (jumping jacks)', 'Cardio', 'Principiante', '4x30 s', ['gemelos', 'deltoide_lat'], ['cuadriceps', 'abductores'],
+        'De pie, pies juntos y brazos al costado.',
+        ['Saltá abriendo las piernas y subiendo los brazos por los costados.', 'Saltá de nuevo cerrando piernas y bajando los brazos.', 'Ritmo constante.'],
+        ['Sin salto: abrí una pierna por vez.'], ['Caer con los talones de golpe.']),
+      ex('skipping', 'Skipping (rodillas arriba)', 'Cardio', 'Principiante', '4x30 s', ['cuadriceps', 'abdomen'], ['gemelos'],
+        'De pie, como para trotar en el lugar.',
+        ['Subí una rodilla hasta la altura de la cadera.', 'Cambiá de pierna rápido acompañando con los brazos.'],
+        ['Apoyá en la punta del pie.'], ['Inclinarse hacia atrás.']),
+      ex('talones', 'Talones a la cola', 'Cardio', 'Principiante', '4x30 s', ['isquios', 'gemelos'], ['cuadriceps'],
+        'De pie, como para trotar en el lugar.',
+        ['Trotá llevando los talones hacia la cola.', 'Brazos acompañando.'], ['Ritmo suave para entrar en calor, rápido para HIIT.'], ['Inclinar el torso hacia adelante.']),
+      ex('burpees', 'Burpees', 'Cuerpo completo', 'Avanzado', '4x10', ['cuadriceps', 'pecho'], ['triceps', 'abdomen', 'gemelos'],
+        'De pie, pies al ancho de hombros.',
+        ['Agachate y apoyá las manos en el piso.', 'Llevá los pies atrás a plancha (y si podés, hacé una flexión).', 'Volvé los pies a las manos y saltá con los brazos arriba.'],
+        ['Más fácil: sin salto y sin flexión, caminando los pies atrás.'], ['Hundir la cadera en la plancha.', 'Caer con las piernas rígidas.']),
+      ex('patinador', 'Saltos de patinador', 'Cardio', 'Intermedio', '4x30 s', ['gluteos', 'abductores'], ['cuadriceps', 'gemelos'],
+        'De pie, apoyado en una pierna.',
+        ['Saltá hacia un costado y caé en la otra pierna, flexionando la rodilla.', 'La pierna libre cruza por detrás.', 'Saltá de vuelta al otro lado.'],
+        ['Caé suave, en la punta y después todo el pie.'], ['Rodilla hacia adentro al caer.']),
+      ex('zancada-salto', 'Zancadas con salto', 'Potencia', 'Avanzado', '3x12 (6 c/pierna)', ['cuadriceps', 'gluteos'], ['gemelos', 'isquios'],
+        'En posición de zancada, una pierna adelante y otra atrás.',
+        ['Bajá a la zancada.', 'Saltá y cambiá las piernas en el aire.', 'Caé suave en la zancada contraria.'],
+        ['Si molesta la rodilla, hacé zancadas alternadas sin salto.'], ['Caer con la rodilla de atrás golpeando el piso.'])
+    ]
+  },
+
+  /* ===================== SILLA, SOFÁ O MESA ===================== */
+  {
+    id: 'silla', name: 'Con silla, sofá o mesa', short: 'Silla, sofá o mesa', group: 'Silla o sofá',
+    desc: 'Muebles firmes que tenés en casa sirven de banco, cajón y hasta de barra. Revisá siempre que no se muevan antes de cargar tu peso.',
+    safety: [
+      'Usá una silla sin rueditas, apoyada contra la pared para que no se corra.',
+      'La mesa para el remo tiene que ser firme y pesada: probala antes con poco peso.',
+      'Nada de sillas plegables ni banquetas que se doblen.'
+    ],
+    exercises: [
+      ex('fondos-silla', 'Fondos de tríceps en silla', 'Tríceps', 'Principiante', '3x12', ['triceps'], ['deltoide_ant', 'pecho_inf'],
+        'Sentado en el borde de la silla, manos al lado de la cola con los dedos hacia adelante. Bajá la cola de la silla.',
+        ['Doblá los codos y bajá hasta que el brazo quede paralelo al piso.', 'Empujá hasta estirar los brazos.', 'La espalda roza la silla.'],
+        ['Rodillas dobladas = más fácil; piernas estiradas = más difícil.'], ['Bajar de más (lastima el hombro).', 'Abrir los codos.']),
+      ex('bulgara-silla', 'Sentadilla búlgara con silla', 'Cuádriceps', 'Intermedio', '3x10 c/pierna', ['cuadriceps', 'gluteos'], ['isquios', 'aductores'],
+        'De espaldas a la silla, con el empeine de un pie apoyado en el asiento y el otro pie un paso largo adelante.',
+        ['Bajá la rodilla de atrás hacia el piso.', 'Llegá hasta que el muslo de adelante quede paralelo.', 'Subí empujando con el talón de adelante.'],
+        ['Torso apenas inclinado = más glúteo.'], ['Pie de adelante muy cerca de la silla.', 'Rodilla hacia adentro.']),
+      ex('step-up-silla', 'Subida a la silla (step-up)', 'Glúteo', 'Principiante', '3x10 c/pierna', ['gluteos', 'cuadriceps'], ['isquios'],
+        'Frente a una silla firme o un escalón alto.',
+        ['Apoyá un pie completo en la silla.', 'Subí empujando con esa pierna, sin impulsarte con la de abajo.', 'Bajá lento con la misma pierna.'],
+        ['Si la silla es alta, empezá con un escalón.'], ['Impulsarse con la pierna de abajo.', 'Apoyar solo la punta.']),
+      ex('sentadilla-silla', 'Sentadilla a la silla', 'Cuádriceps', 'Principiante', '3x12', ['cuadriceps', 'gluteos'], ['isquios'],
+        'De espaldas a una silla, pies al ancho de hombros.',
+        ['Bajá llevando la cadera atrás hasta rozar el asiento con la cola.', 'Sin sentarte del todo, subí.', 'Brazos al frente para equilibrarte.'],
+        ['Ideal para aprender la sentadilla o si tenés molestias.'], ['Dejarse caer en la silla.', 'Rodillas hacia adentro.']),
+      ex('hip-thrust-sofa', 'Hip thrust con la espalda en el sofá', 'Glúteo', 'Intermedio', '4x12', ['gluteos'], ['isquios', 'cuadriceps'],
+        'Espalda alta apoyada en el borde del sofá, pies apoyados al ancho de cadera y rodillas dobladas.',
+        ['Subí la cadera apretando los glúteos hasta que el cuerpo quede como una mesa.', 'Pausá 1 segundo arriba.', 'Bajá controlando.'],
+        ['Para más carga, apoyá una mochila con peso sobre la cadera.'], ['Arquear la zona lumbar arriba.', 'Pies muy cerca o muy lejos.']),
+      ex('flexiones-inclinadas', 'Flexiones con manos en la silla', 'Pecho', 'Principiante', '3x12', ['pecho_inf'], ['triceps', 'deltoide_ant'],
+        'Manos en el asiento de una silla firme apoyada contra la pared, cuerpo recto.',
+        ['Bajá el pecho hacia el borde de la silla.', 'Empujá hasta estirar los brazos.'],
+        ['Es el paso entre la flexión en la pared y la del piso.'], ['Cadera caída.']),
+      ex('flexiones-declinadas', 'Flexiones con pies en la silla', 'Pecho superior', 'Avanzado', '3x8', ['pecho_sup', 'deltoide_ant'], ['triceps'],
+        'Manos en el piso y pies apoyados en la silla.',
+        ['Bajá controlando hasta cerca del piso.', 'Empujá manteniendo el cuerpo recto.'],
+        ['Trabaja más el pecho de arriba y el hombro.'], ['Hundir la cadera.', 'Golpear el piso con la cara.']),
+      ex('remo-mesa', 'Remo invertido debajo de la mesa', 'Espalda', 'Intermedio', '3x10', ['dorsal', 'romboides'], ['biceps', 'deltoide_post'],
+        'Acostado debajo de una mesa firme, agarrado del borde con los brazos estirados y el cuerpo recto.',
+        ['Tirá llevando el pecho hacia el borde de la mesa.', 'Apretá las escápulas arriba.', 'Bajá lento.'],
+        ['Rodillas dobladas = más fácil.'], ['Hundir la cadera.', 'Usar una mesa liviana o con patas plegables.'])
+    ]
+  },
+
+  /* ===================== BARRA DE DOMINADAS ===================== */
+  {
+    id: 'barra', name: 'Barra de dominadas (de puerta)', short: 'Barra de dominadas', group: 'Barra',
+    desc: 'Una barra de puerta es la mejor inversión para entrenar la espalda en casa. Si todavía no podés hacer dominadas, empezá por colgarte y por las negativas.',
+    safety: [
+      'Revisá que la barra esté bien trabada antes de colgarte.',
+      'Nada de balanceos ni impulsos: pueden soltar la barra del marco.',
+      'Bajá siempre controlando, nunca te dejes caer.'
+    ],
+    exercises: [
+      ex('colgarse', 'Colgarse de la barra', 'Agarre / dorsal', 'Principiante', '3x20–30 s', ['antebrazo', 'dorsal'], ['trapecio'],
+        'Agarrá la barra con las palmas hacia adelante, un poco más abierto que los hombros.',
+        ['Colgate con los brazos estirados (si tocás el piso, doblá las rodillas).', 'Hombros activos: alejalos un poco de las orejas.', 'Sostené respirando.'],
+        ['Descomprime la espalda y fortalece el agarre.'], ['Hombros pegados a las orejas, totalmente flojos.']),
+      ex('negativas', 'Dominadas negativas', 'Dorsal', 'Principiante', '3x5', ['dorsal', 'biceps'], ['romboides', 'antebrazo'],
+        'Subite con una silla hasta quedar con el mentón arriba de la barra.',
+        ['Sacá los pies de la silla.', 'Bajá lo más lento que puedas (3–5 segundos).', 'Volvé a subir con la silla.'],
+        ['Es la forma más rápida de lograr tu primera dominada.'], ['Dejarse caer al final.']),
+      ex('dominadas', 'Dominadas', 'Dorsal', 'Avanzado', '4x5–8', ['dorsal'], ['biceps', 'romboides', 'deltoide_post'],
+        'Colgado con agarre prono (palmas hacia adelante), un poco más abierto que los hombros.',
+        ['Tirá llevando el pecho hacia la barra.', 'Pasá el mentón por arriba.', 'Bajá controlando hasta estirar los brazos.'],
+        ['Pensá en llevar los codos hacia los bolsillos.'], ['Balancearse con las piernas.', 'Subir a medias.']),
+      ex('chin-ups', 'Dominadas supinas (chin-ups)', 'Bíceps / dorsal', 'Intermedio', '4x5–8', ['dorsal', 'biceps'], ['romboides'],
+        'Colgado con las palmas mirándote, manos al ancho de hombros.',
+        ['Tirá hasta pasar el mentón por arriba de la barra.', 'Bajá lento hasta estirar los brazos.'],
+        ['Suelen ser más fáciles que las dominadas prono.'], ['Patalear para subir.', 'No estirar los brazos abajo.']),
+      ex('rodillas-colgado', 'Elevación de rodillas colgado', 'Abdominales', 'Intermedio', '3x10', ['abdomen'], ['oblicuos', 'antebrazo'],
+        'Colgado de la barra con los brazos estirados.',
+        ['Subí las rodillas hacia el pecho enrollando la cadera.', 'Bajá lento sin balancearte.'],
+        ['Más difícil: piernas estiradas.'], ['Balancear el cuerpo.', 'Subir solo hasta la cadera sin enrollar.'])
+    ]
+  },
+
+  /* ===================== MOCHILA O BOTELLAS ===================== */
+  {
+    id: 'mochila', name: 'Con mochila o botellas con peso', short: 'Mochila o botellas', group: 'Mochila o botellas',
+    desc: 'Una mochila con libros, arena o paquetes de arroz y dos botellas llenas de agua o arena reemplazan a las mancuernas. Ajustá el peso agregando o sacando cosas.',
+    safety: [
+      'Cerrá bien la mochila y repartí el peso para que no se mueva.',
+      'Usá botellas con tapa a rosca y mojadas no: se resbalan.',
+      'Empezá con poco peso: 1,5 litros de agua = 1,5 kg.'
+    ],
+    exercises: [
+      ex('goblet-mochila', 'Sentadilla con mochila al pecho', 'Cuádriceps', 'Principiante', '4x12', ['cuadriceps', 'gluteos'], ['isquios', 'abdomen'],
+        'Abrazá la mochila contra el pecho. Pies al ancho de hombros.',
+        ['Bajá llevando la cadera atrás y abajo.', 'Codos entre las rodillas abajo.', 'Subí empujando con todo el pie.'],
+        ['El peso adelante te ayuda a mantener el pecho alto.'], ['Redondear la espalda.', 'Levantar talones.']),
+      ex('rumano-mochila', 'Peso muerto rumano con mochila', 'Isquiotibiales', 'Principiante', '4x12', ['isquios', 'gluteos'], ['lumbar'],
+        'De pie con la mochila colgando de las manos delante de los muslos.',
+        ['Llevá la cadera atrás con las rodillas apenas flexionadas.', 'La mochila baja rozando las piernas hasta media canilla.', 'Volvé apretando los glúteos.'],
+        ['Espalda recta todo el tiempo.'], ['Alejar el peso del cuerpo.', 'Redondear la espalda.']),
+      ex('remo-mochila', 'Remo con mochila', 'Espalda', 'Principiante', '4x12', ['dorsal', 'romboides'], ['biceps', 'deltoide_post'],
+        'Torso inclinado hacia adelante unos 45°, rodillas flexionadas, mochila colgando de las manos.',
+        ['Tirá la mochila hacia el ombligo llevando los codos atrás.', 'Apretá las escápulas.', 'Bajá lento.'],
+        ['Torso quieto: tiran los brazos y la espalda.'], ['Pararse mientras tirás.', 'Encoger los hombros.']),
+      ex('press-hombros', 'Press de hombros con botellas', 'Hombros', 'Principiante', '3x12', ['deltoide_ant', 'deltoide_lat'], ['triceps', 'trapecio'],
+        'De pie o sentado, una botella en cada mano a la altura de los hombros.',
+        ['Empujá las botellas hacia arriba hasta estirar los brazos.', 'Bajá hasta la altura de las orejas.'],
+        ['Abdomen firme para no arquear la espalda.'], ['Tirarse hacia atrás.', 'Bajar muy poco.']),
+      ex('laterales', 'Elevaciones laterales con botellas', 'Hombros', 'Principiante', '3x15', ['deltoide_lat'], ['trapecio'],
+        'De pie, una botella en cada mano al costado del cuerpo.',
+        ['Subí los brazos por los costados con los codos apenas doblados.', 'Hasta la altura de los hombros.', 'Bajá lento.'],
+        ['Liviano y prolijo: el hombro se cansa rápido.'], ['Subir por encima del hombro.', 'Balancear el cuerpo.']),
+      ex('pajaro', 'Pájaro con botellas (hombro de atrás)', 'Hombro posterior', 'Principiante', '3x15', ['deltoide_post'], ['romboides', 'trapecio'],
+        'Torso inclinado casi paralelo al piso, botellas colgando debajo del pecho.',
+        ['Abrí los brazos hacia los costados como alas.', 'Apretá las escápulas arriba.', 'Bajá lento.'],
+        ['Codos apenas flexionados y fijos.'], ['Subir con impulso del torso.']),
+      ex('curl', 'Curl de bíceps con mochila', 'Bíceps', 'Principiante', '3x12', ['biceps'], ['antebrazo'],
+        'De pie, agarrando la mochila de las manijas con las palmas hacia arriba.',
+        ['Subí doblando los codos, que quedan pegados al cuerpo.', 'Apretá arriba.', 'Bajá lento hasta estirar.'],
+        ['Con botellas podés hacerlo alternado.'], ['Balancear el cuerpo.', 'Adelantar los codos.']),
+      ex('frances', 'Extensión de tríceps sobre la cabeza', 'Tríceps', 'Principiante', '3x12', ['triceps'], [],
+        'De pie o sentado, una botella (o la mochila) agarrada con las dos manos arriba de la cabeza.',
+        ['Bajá el peso detrás de la cabeza doblando los codos.', 'Subí estirando los brazos.', 'Los codos apuntan al techo.'],
+        ['Codos cerca de la cabeza.'], ['Abrir los codos.', 'Arquear la espalda.'])
+    ]
+  },
+
+  /* ===================== BANDA ELÁSTICA ===================== */
+  {
+    id: 'banda', name: 'Con banda elástica', short: 'Banda elástica', group: 'Banda elástica',
+    desc: 'Una banda con manijas o un tubo elástico se ata a la puerta o se pisa con los pies. Cuanto más la estirás, más resistencia.',
+    safety: [
+      'Revisá que la banda no tenga cortes ni grietas.',
+      'Si la atás a la puerta, cerrala con llave del lado contrario.',
+      'Soltala siempre despacio, nunca de golpe.'
+    ],
+    exercises: [
+      ex('remo-banda', 'Remo con banda', 'Espalda', 'Principiante', '3x15', ['dorsal', 'romboides'], ['biceps', 'deltoide_post'],
+        'Banda atada a la puerta a la altura del pecho. Parado, brazos estirados al frente.',
+        ['Tirá llevando los codos hacia atrás pegados al cuerpo.', 'Apretá las escápulas.', 'Volvé lento.'],
+        ['Alejate un paso para más resistencia.'], ['Tirarse hacia atrás.', 'Encoger los hombros.']),
+      ex('face-pull', 'Face pull con banda', 'Hombro posterior', 'Principiante', '3x15', ['deltoide_post', 'romboides'], ['trapecio'],
+        'Banda atada arriba de la puerta, a la altura de la cara.',
+        ['Tirá hacia la cara separando las manos.', 'Codos altos, terminás como mostrando los bíceps.', 'Volvé lento.'],
+        ['Excelente para la postura y los hombros.'], ['Bajar los codos.', 'Tirar con la espalda baja.']),
+      ex('press-pecho-banda', 'Press de pecho con banda', 'Pecho', 'Principiante', '3x15', ['pecho'], ['triceps', 'deltoide_ant'],
+        'Banda pasada por la espalda (o atada atrás) y una manija en cada mano a la altura del pecho.',
+        ['Empujá hacia adelante hasta estirar los brazos.', 'Juntá un poco las manos al final.', 'Volvé lento.'],
+        ['Dá un paso adelante para más resistencia.'], ['Arquear la espalda.']),
+      ex('curl-banda', 'Curl de bíceps con banda', 'Bíceps', 'Principiante', '3x15', ['biceps'], ['antebrazo'],
+        'Pisá la banda con los dos pies y agarrá las manijas con las palmas hacia arriba.',
+        ['Subí doblando los codos, pegados al cuerpo.', 'Bajá lento sin soltar la tensión.'],
+        ['Pies más abiertos = más tensión.'], ['Balancear el cuerpo.']),
+      ex('triceps-banda', 'Extensión de tríceps con banda', 'Tríceps', 'Principiante', '3x15', ['triceps'], [],
+        'Banda atada arriba de la puerta, manos a la altura del pecho y codos pegados.',
+        ['Empujá hacia abajo hasta estirar los brazos.', 'Volvé lento hasta la altura del pecho.'],
+        ['Solo se mueven los antebrazos.'], ['Despegar los codos del cuerpo.', 'Inclinarse para empujar.']),
+      ex('laterales-banda', 'Elevaciones laterales con banda', 'Hombros', 'Principiante', '3x15', ['deltoide_lat'], ['trapecio'],
+        'Pisá la banda con los dos pies y agarrá las manijas al costado.',
+        ['Subí los brazos por los costados hasta los hombros.', 'Bajá lento.'],
+        ['Banda liviana: el hombro se cansa rápido.'], ['Encoger los hombros.']),
+      ex('pallof', 'Press Pallof (antirrotación)', 'Core', 'Intermedio', '3x10 c/lado', ['oblicuos', 'abdomen'], [],
+        'De costado a la puerta con la banda atada a la altura del pecho. Manos juntas en el pecho.',
+        ['Empujá las manos al frente sin dejar que la banda te gire.', 'Sostené 2 segundos.', 'Volvé al pecho.'],
+        ['Más lejos de la puerta = más difícil.'], ['Girar el torso.']),
+      ex('caminata-lateral', 'Caminata lateral con banda', 'Glúteo medio', 'Principiante', '3x12 pasos c/lado', ['abductores'], ['gluteos'],
+        'Banda chica (mini band) arriba de las rodillas o en los tobillos. Media sentadilla.',
+        ['Dá un paso al costado abriendo contra la banda.', 'Acercá el otro pie sin juntar del todo.', 'Hacé los pasos para un lado y volvé.'],
+        ['Mantené la tensión de la banda todo el tiempo.'], ['Pararse derecho.', 'Juntar los pies del todo.'])
+    ]
+  }
+];
